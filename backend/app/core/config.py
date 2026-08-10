@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     # Admin bootstrap
     admin_name: str = "Platform Admin"
-    admin_email: str = "admin@quizzz.local"
+    admin_email: str = "admin@quizzz.com"
     admin_password: str = "admin12345"
 
     # Mistral
