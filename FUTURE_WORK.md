@@ -17,6 +17,19 @@ Items intentionally deferred from the Core MVP. Grouped by area. See
       match-the-following, image-based, code-based.
 - [ ] Configurable max-attempts enforcement UI polish.
 
+## Quiz-Taking UI — Google-Forms style (planned during frontend step)
+- [ ] Render the attempt panel like Google Forms, not plain text: the input control
+      is chosen by the question **type/mode set by faculty**:
+      - Single-choice (MCQ) → **radio buttons**
+      - Multiple-correct → **checkboxes**
+      - Fill-in-the-blank → **text blank input**
+- [ ] Faculty question editor lets them pick the question type (drives the control).
+      (Backend currently supports single-correct MCQ; multiple-correct and
+      fill-in-the-blank types must be added to models/scoring — see question types below.)
+- [ ] Right-side **scratchpad / workout space** next to the question: a rough area
+      for rough work, supporting both **freehand drawing** (canvas) and **typed** notes.
+      Per-question or per-quiz; not graded, not submitted (local only for MVP).
+
 ## Classes / Enrollment (design option "C")
 - [ ] Class/section entity.
 - [ ] Faculty own classes; assign quizzes to a class.
