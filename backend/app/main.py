@@ -1,0 +1,50 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.core.config import settings
+
+app = FastAPI(title="Quiz Management & Online Assessment Platform", version="0.1.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[settings.frontend_origin],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/api/health", tags=["health"])
+def health() -> dict:
+    return {"status": "ok"}
+
+
+def register_routers() -> None:
+    """Routers are imported lazily and registered as they are implemented."""
+    from app.routers import (  # noqa: PLC0415
+        admin,
+        ai,
+        attempts,
+        auth,
+        categories,
+        leaderboard,
+        questions,
+        quizzes,
+        users,
+    )
+
+    for module in (
+        auth,
+        users,
+        categories,
+        quizzes,
+        questions,
+        ai,
+        attempts,
+        admin,
+        leaderboard,
+    ):
+        app.include_router(module.router)
+
+
+register_routers()
