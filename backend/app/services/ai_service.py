@@ -110,4 +110,8 @@ def generate_questions(
         num_questions=num_questions,
     )
     raw = _call_mistral(prompt)
-    return _parse_questions(raw)
+    drafts = _parse_questions(raw)
+    # Honor the faculty-selected difficulty for every generated question.
+    for draft in drafts:
+        draft.difficulty = difficulty
+    return drafts
