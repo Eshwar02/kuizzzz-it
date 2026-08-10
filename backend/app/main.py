@@ -27,6 +27,7 @@ def register_routers() -> None:
         attempts,
         auth,
         categories,
+        dashboard,
         leaderboard,
         questions,
         quizzes,
@@ -41,6 +42,7 @@ def register_routers() -> None:
         questions,
         ai,
         attempts,
+        dashboard,
         admin,
         leaderboard,
     ):
