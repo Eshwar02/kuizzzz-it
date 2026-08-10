@@ -35,6 +35,16 @@ Items intentionally deferred from the Core MVP. Grouped by area. See
 - [ ] Certificate generation on passing a quiz (PDF).
 - [ ] CSV/Excel question import.
 
+## Security — Login IP Logging (planned during frontend step)
+- [ ] **Backend:** on login, capture the client IP (`request.client.host`, honoring
+      `X-Forwarded-For` when behind a proxy). Return the detected IP in the login
+      response. For FACULTY and ADMIN logins, persist a `login_events` record
+      (user_id, ip, user_agent, timestamp) for audit/misuse detection.
+- [ ] **Frontend:** in the login box, display the user's detected IP address with a
+      note: *"Your IP address is collected for security purposes and to prevent
+      account misuse."* Emphasize this for faculty/admin logins.
+- [ ] (Later) alert/lock on logins from unexpected IPs for privileged accounts.
+
 ## UX / Platform
 - [ ] Dark mode (light/dark theme toggle).
 - [ ] Full responsive pass for tablet/mobile (MVP targets desktop/laptop).
