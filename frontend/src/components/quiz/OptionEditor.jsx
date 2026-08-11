@@ -8,7 +8,7 @@ export default function OptionEditor({ value, onChange }) {
   const remove = (i) => {
     if (value.length <= 2) return;
     const next = value.filter((_, idx) => idx !== i);
-    if (!next.some((o) => o.is_correct)) next[0].is_correct = true; // keep exactly one
+    if (!next.some((o) => o.is_correct)) next[0] = { ...next[0], is_correct: true }; // keep exactly one (clone, don't mutate)
     onChange(next);
   };
   return (
