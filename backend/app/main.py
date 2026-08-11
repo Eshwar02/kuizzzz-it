@@ -27,6 +27,7 @@ def register_routers() -> None:
         attempts,
         auth,
         categories,
+        classrooms,
         dashboard,
         leaderboard,
         questions,
@@ -45,6 +46,7 @@ def register_routers() -> None:
         dashboard,
         admin,
         leaderboard,
+        classrooms,
     ):
         app.include_router(module.router)
 
