@@ -1,6 +1,15 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, Enum as SAEnum, Float, ForeignKey, Integer
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Enum as SAEnum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -30,6 +39,7 @@ class Attempt(Base):
     )
     started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    layout: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     quiz: Mapped["Quiz"] = relationship(back_populates="attempts")  # noqa: F821
     user: Mapped["User"] = relationship(back_populates="attempts")  # noqa: F821
@@ -51,6 +61,8 @@ class Answer(Base):
     selected_option_id: Mapped[int | None] = mapped_column(
         ForeignKey("options.id", ondelete="SET NULL"), nullable=True
     )
+    selected_option_ids: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    text_answer: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     is_correct: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     attempt: Mapped["Attempt"] = relationship(back_populates="answers")
