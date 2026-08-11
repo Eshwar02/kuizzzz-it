@@ -9,17 +9,23 @@ export default function Register() {
   const navigate = useNavigate();
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm();
   const [done, setDone] = useState("");
+  const [apiError, setApiError] = useState("");
   const asFaculty = watch("as_faculty");
 
   const onSubmit = async (values) => {
-    await doRegister({
-      name: values.name, email: values.email, password: values.password, as_faculty: !!values.as_faculty,
-    });
-    if (values.as_faculty) {
-      setDone("Faculty account created and is pending admin approval. You'll be able to sign in once an admin activates it.");
-    } else {
-      await login(values.email, values.password);
-      navigate(roleHome(), { replace: true });
+    setApiError("");
+    try {
+      await doRegister({
+        name: values.name, email: values.email, password: values.password, as_faculty: !!values.as_faculty,
+      });
+      if (values.as_faculty) {
+        setDone("Faculty account created and is pending admin approval. You'll be able to sign in once an admin activates it.");
+      } else {
+        await login(values.email, values.password);
+        navigate(roleHome(), { replace: true });
+      }
+    } catch (e) {
+      setApiError(e.response?.data?.detail || "Could not create the account. The email may already be registered.");
     }
   };
 
@@ -41,6 +47,7 @@ export default function Register() {
               <label className="flex items-center gap-2 text-sm text-ink/80">
                 <input type="checkbox" {...register("as_faculty")} /> Register as faculty (requires admin approval)
               </label>
+              {apiError && <p className="text-sm text-red-600">{apiError}</p>}
               <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? "Creating…" : asFaculty ? "Request faculty account" : "Create account"}
               </Button>
