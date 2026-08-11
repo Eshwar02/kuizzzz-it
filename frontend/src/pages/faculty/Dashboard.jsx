@@ -6,7 +6,7 @@ import { fmtPct } from "../../lib/format";
 
 export default function FacultyDashboard() {
   const [d, setD] = useState(null);
-  useEffect(() => { dashboardApi.faculty().then(setD); }, []);
+  useEffect(() => { dashboardApi.faculty().then(setD).catch(() => setD({})); }, []);
   if (!d) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
   return (
     <div className="space-y-4">
