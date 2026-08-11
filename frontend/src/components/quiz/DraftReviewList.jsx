@@ -5,7 +5,7 @@ import QuestionForm from "./QuestionForm";
 // drafts: array of DraftQuestion. Faculty can edit or drop each before approving.
 export default function DraftReviewList({ drafts, onChange }) {
   const [editIdx, setEditIdx] = useState(null);
-  const update = (idx, q) => { onChange(drafts.map((d, i) => (i === idx ? q : d))); setEditIdx(null); };
+  const update = (idx, q) => { onChange(drafts.map((d, i) => (i === idx ? { ...q, _key: d._key } : d))); setEditIdx(null); };
   const drop = (idx) => onChange(drafts.filter((_, i) => i !== idx));
 
   return (
@@ -13,7 +13,7 @@ export default function DraftReviewList({ drafts, onChange }) {
       {drafts.map((d, i) => {
         const correct = d.options.find((o) => o.is_correct);
         return (
-          <Card key={i}>
+          <Card key={d._key ?? i}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-medium text-ink">{i + 1}. {d.question_text}</p>

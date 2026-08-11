@@ -23,15 +23,21 @@ export default function AIGenerate() {
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  // Give each draft a stable identity so editing/removing one doesn't shuffle
+  // React keys. Stripped from the approve payload below.
+  const withKeys = (qs) => qs.map((q) => ({ ...q, _key: crypto.randomUUID() }));
+
+  const stopPoll = () => { clearInterval(pollRef.current); pollRef.current = null; };
+
   const poll = (id) => {
     pollRef.current = setInterval(async () => {
       const job = await aiApi.getJob(id);
       if (job.status === "COMPLETED") {
-        clearInterval(pollRef.current);
-        setDrafts(job.draft_questions);
+        stopPoll();
+        setDrafts(withKeys(job.draft_questions));
         setPhase("review");
       } else if (job.status === "FAILED") {
-        clearInterval(pollRef.current);
+        stopPoll();
         setError(job.error || "Generation failed.");
         setPhase("idle");
       }
@@ -47,7 +53,7 @@ export default function AIGenerate() {
       const opts = { mode, ...form, num_questions: Number(form.num_questions), quiz_id: form.quiz_id ? Number(form.quiz_id) : null, file: mode === "PDF" ? file : null };
       const job = await aiApi.generate(opts);
       setJobId(job.id);
-      if (job.status === "COMPLETED") { setDrafts(job.draft_questions); setPhase("review"); }
+      if (job.status === "COMPLETED") { setDrafts(withKeys(job.draft_questions)); setPhase("review"); }
       else poll(job.id);
     } catch (e) {
       setError(e.response?.data?.detail || "Generation failed."); setPhase("idle");
@@ -60,7 +66,10 @@ export default function AIGenerate() {
     if (drafts.some((d) => d.options.filter((o) => o.is_correct).length !== 1)) return setError("Every question needs exactly one correct option.");
     setPhase("approving");
     try {
-      await aiApi.approve(jobId, { quiz_id: Number(form.quiz_id), questions: drafts });
+      await aiApi.approve(jobId, {
+        quiz_id: Number(form.quiz_id),
+        questions: drafts.map(({ _key, ...q }) => q),
+      });
       navigate(`/faculty/quizzes/${form.quiz_id}/questions`);
     } catch (e) {
       setError(e.response?.data?.detail || "Approval failed."); setPhase("review");
@@ -71,7 +80,7 @@ export default function AIGenerate() {
     <div className="space-y-4 max-w-2xl">
       <h1 className="text-2xl font-semibold text-ink">AI question generation</h1>
 
-      {phase !== "review" && (
+      {(phase === "idle" || phase === "generating") && (
         <Card title="Generate">
           <div className="space-y-3">
             <Select label="Mode" value={mode} onChange={(e) => setMode(e.target.value)}>
@@ -108,7 +117,7 @@ export default function AIGenerate() {
       {phase === "review" || phase === "approving" ? (
         <Card title={`Review ${drafts.length} draft question(s)`} actions={
           <div className="flex gap-2">
-            <Button variant="secondary" onClick={() => { clearInterval(pollRef.current); setPhase("idle"); setDrafts([]); }}>Discard</Button>
+            <Button variant="secondary" onClick={() => { stopPoll(); setError(""); setPhase("idle"); setDrafts([]); }}>Discard</Button>
             <Button onClick={approve} disabled={phase === "approving"}>{phase === "approving" ? "Approving…" : "Approve into quiz"}</Button>
           </div>
         }>
