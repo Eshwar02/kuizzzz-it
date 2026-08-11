@@ -37,7 +37,7 @@ export default function Analytics() {
         <ChartCard title="Pass / Fail">
           <PieChart>
             <Pie data={a.pass_fail} dataKey="value" nameKey="label" outerRadius={90} label>
-              {a.pass_fail.map((_, i) => <Cell key={i} fill={chartColors[i % chartColors.length]} />)}
+              {a.pass_fail.map((pt, i) => <Cell key={pt.label} fill={chartColors[i % chartColors.length]} />)}
             </Pie>
             <Tooltip />
           </PieChart>

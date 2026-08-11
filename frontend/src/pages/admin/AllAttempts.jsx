@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { dashboardApi } from "../../api";
 import { Card, Table, Badge, Modal, Spinner, Button, Stat } from "../../components/ui";
 import { fmtDate, fmtDuration } from "../../lib/format";
@@ -6,9 +6,17 @@ import { fmtDate, fmtDuration } from "../../lib/format";
 export default function AllAttempts() {
   const [rows, setRows] = useState(null);
   const [detail, setDetail] = useState(null);
+  const reqSeq = useRef(0);
   useEffect(() => { dashboardApi.adminAttempts().then(setRows); }, []);
 
-  const open = async (r) => { setDetail("loading"); setDetail(await dashboardApi.adminAttempt(r.id)); };
+  // Sequence guard: if the user opens another row before the first fetch
+  // resolves, only the latest request is allowed to set the detail.
+  const open = async (r) => {
+    const seq = ++reqSeq.current;
+    setDetail("loading");
+    const result = await dashboardApi.adminAttempt(r.id);
+    if (reqSeq.current === seq) setDetail(result);
+  };
 
   if (!rows) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
   const columns = [
