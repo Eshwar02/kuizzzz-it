@@ -1,4 +1,4 @@
-import { useEffect, useState, createContext, useContext } from "react";
+import { useEffect, useState, useMemo, useCallback, createContext, useContext } from "react";
 import { subscribe, toast as rawToast } from "../../lib/toast";
 
 const ToastCtx = createContext({ push: () => {} });
@@ -16,9 +16,10 @@ export function ToastProvider({ children }) {
     setItems((cur) => [...cur, item]);
     setTimeout(() => setItems((cur) => cur.filter((i) => i.id !== item.id)), 4000);
   }), []);
-  const push = ({ message, tone }) => rawToast(message, tone);
+  const push = useCallback(({ message, tone }) => rawToast(message, tone), []);
+  const ctx = useMemo(() => ({ push }), [push]);
   return (
-    <ToastCtx.Provider value={{ push }}>
+    <ToastCtx.Provider value={ctx}>
       {children}
       <div className="fixed top-4 right-4 z-50 space-y-2 w-80">
         {items.map((i) => (

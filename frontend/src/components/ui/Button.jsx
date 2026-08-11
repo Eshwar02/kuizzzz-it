@@ -4,7 +4,7 @@ const variants = {
   danger: "bg-red-600 text-white hover:bg-red-700 border-red-600",
   ghost: "bg-transparent text-ink hover:bg-ink/5 border-transparent",
 };
-const sizes = { sm: "px-2.5 py-1 text-sm", md: "px-4 py-2 text-sm", lg: "px-5 py-2.5" };
+const sizes = { sm: "px-2.5 py-1 text-sm", md: "px-4 py-2 text-sm", lg: "px-5 py-2.5 text-base" };
 export default function Button({ variant = "primary", size = "md", className = "", ...props }) {
   return (
     <button
