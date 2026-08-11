@@ -70,7 +70,7 @@ Trust boundary: correct answers, scores, roles, completion status, and attempt e
 | Database | PostgreSQL (dev & prod); Neon-compatible for serverless hosting |
 | Auth | JWT (python-jose), bcrypt password hashing |
 | AI | Mistral API (`mistralai`), `pypdf` for document extraction |
-| Frontend | React (Vite), Tailwind CSS, React Router, Axios, Recharts *(in progress)* |
+| Frontend | React 18 (Vite), Tailwind CSS, React Router, Axios, Recharts, React Hook Form |
 | Testing | pytest with transaction-rollback isolation |
 
 ## Project Structure
@@ -93,7 +93,7 @@ quizzz/
 │  ├─ scripts/         # database bootstrap SQL
 │  ├─ tests/           # pytest suite
 │  └─ requirements.txt
-├─ frontend/           # React app (in progress)
+├─ frontend/           # React (Vite) app — all three role UIs
 ├─ docs/               # design specs
 └─ FUTURE_WORK.md      # roadmap / deferred features
 ```
@@ -164,6 +164,27 @@ uvicorn app.main:app --reload
 - API base: `http://localhost:8000/api`
 - Interactive docs: `http://localhost:8000/docs`
 - Health check: `http://localhost:8000/api/health`
+
+## Getting Started (Frontend)
+
+The React app lives in `frontend/` and talks to the backend over REST.
+
+```bash
+cd frontend
+npm install
+cp .env.example .env      # set VITE_API_BASE_URL if the backend isn't on :8000
+npm run dev               # http://localhost:5173
+```
+
+Build for production with `npm run build` (outputs `dist/`). Ensure the backend's
+`FRONTEND_ORIGIN` matches the frontend URL so CORS allows the browser requests.
+
+The frontend covers all three roles — student (browse, timed attempts with a
+Google-Forms-style question form and a local scratchpad, results/review,
+dashboard, leaderboard), faculty (quiz & question authoring, AI generation with
+draft review/approve, dashboard), and admin (user management, categories,
+analytics, attempts). All scoring, the exam timer, and correct answers stay
+server-side; the client only renders backend responses.
 
 ## Testing
 

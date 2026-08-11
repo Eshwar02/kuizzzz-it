@@ -33,6 +33,15 @@ def _make_quiz_with_questions(client, fac_headers, *, passing=60, max_attempts=1
 
 
 # ---------- Auth & RBAC ----------
+def test_login_returns_client_ip(client, make_user):
+    make_user("iptest@test.com", UserRole.STUDENT)
+    resp = client.post("/api/auth/login", json={"email": "iptest@test.com", "password": "password123"})
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "access_token" in body
+    assert "client_ip" in body  # present even if null in tests
+
+
 def test_admin_login_and_me(client, make_user, auth):
     make_user("admin2@test.com", UserRole.ADMIN)
     headers = auth("admin2@test.com")
