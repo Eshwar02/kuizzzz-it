@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -49,6 +50,39 @@ def _expires_at(attempt: Attempt, quiz: Quiz) -> datetime:
     return started + timedelta(minutes=quiz.duration_minutes)
 
 
+def _aware(dt: datetime) -> datetime:
+    return dt if dt.tzinfo is not None else dt.replace(tzinfo=timezone.utc)
+
+
+def _build_layout(quiz: Quiz, questions: list[Question]) -> dict:
+    qids = [q.id for q in questions]
+    if quiz.shuffle_questions:
+        random.shuffle(qids)
+    options = {}
+    for q in questions:
+        oids = [o.id for o in q.options]
+        if quiz.shuffle_options:
+            random.shuffle(oids)
+        options[str(q.id)] = oids
+    return {"questions": qids, "options": options}
+
+
+def _ordered(questions: list[Question], layout: dict | None) -> list[Question]:
+    if not layout:
+        return questions
+    by_id = {q.id: q for q in questions}
+    ordered = [by_id[qid] for qid in layout.get("questions", []) if qid in by_id]
+    # include any question missing from the frozen layout (e.g. added later)
+    ordered += [q for q in questions if q.id not in layout.get("questions", [])]
+    opt_order = layout.get("options", {})
+    for q in ordered:
+        order = opt_order.get(str(q.id))
+        if order:
+            pos = {oid: i for i, oid in enumerate(order)}
+            q.options.sort(key=lambda o: pos.get(o.id, len(pos)))
+    return ordered
+
+
 @router.post("/quizzes/{quiz_id}/start", response_model=StartAttemptResponse)
 def start_attempt(
     quiz_id: int, db: Session = Depends(get_db), user: User = Depends(Student)
@@ -56,6 +90,18 @@ def start_attempt(
     quiz = db.get(Quiz, quiz_id)
     if quiz is None or quiz.status != QuizStatus.PUBLISHED:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not available")
+
+    now = _now()
+    if quiz.available_from and now < _aware(quiz.available_from):
+        raise HTTPException(status_code=403, detail="This quiz is not yet available")
+    if quiz.available_until and now > _aware(quiz.available_until):
+        raise HTTPException(status_code=403, detail="This quiz is no longer available")
+
+    questions = _load_quiz_questions(db, quiz_id)
+    if not questions:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="This quiz has no questions"
+        )
 
     # Resume an in-progress attempt instead of creating duplicates.
     existing = db.scalar(
@@ -78,16 +124,17 @@ def start_attempt(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You have reached the maximum number of attempts for this quiz",
             )
-        existing = Attempt(quiz_id=quiz_id, user_id=user.id, started_at=_now())
+        existing = Attempt(
+            quiz_id=quiz_id,
+            user_id=user.id,
+            started_at=now,
+            layout=_build_layout(quiz, questions),
+        )
         db.add(existing)
         db.commit()
         db.refresh(existing)
 
-    questions = _load_quiz_questions(db, quiz_id)
-    if not questions:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="This quiz has no questions"
-        )
+    questions = _ordered(questions, existing.layout)
 
     return StartAttemptResponse(
         attempt_id=existing.id,

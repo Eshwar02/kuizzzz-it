@@ -207,6 +207,164 @@ def test_leaderboard_reflects_attempts(client, make_user, auth):
     assert any(e["name"] == "lst" for e in board)
 
 
+# ---------- Question types ----------
+def test_create_each_question_type(client, make_user, auth):
+    make_user("qtfac@test.com", UserRole.FACULTY)
+    fac = auth("qtfac@test.com")
+    quiz_id = client.post(
+        "/api/quizzes", json={"title": "Types", "duration_minutes": 5}, headers=fac
+    ).json()["id"]
+
+    multi = client.post(
+        f"/api/quizzes/{quiz_id}/questions",
+        json={
+            "question_text": "pick two",
+            "question_type": "MULTIPLE_CHOICE",
+            "options": [
+                {"option_text": "a", "is_correct": True},
+                {"option_text": "b", "is_correct": True},
+                {"option_text": "c", "is_correct": False},
+            ],
+        },
+        headers=fac,
+    )
+    assert multi.status_code == 201
+    assert multi.json()["question_type"] == "MULTIPLE_CHOICE"
+
+    tf = client.post(
+        f"/api/quizzes/{quiz_id}/questions",
+        json={
+            "question_text": "sky is blue",
+            "question_type": "TRUE_FALSE",
+            "options": [
+                {"option_text": "True", "is_correct": True},
+                {"option_text": "False", "is_correct": False},
+            ],
+        },
+        headers=fac,
+    )
+    assert tf.status_code == 201 and tf.json()["question_type"] == "TRUE_FALSE"
+
+    blank = client.post(
+        f"/api/quizzes/{quiz_id}/questions",
+        json={
+            "question_text": "2+2=?",
+            "question_type": "FILL_BLANK",
+            "accepted_answers": ["4", "four"],
+        },
+        headers=fac,
+    )
+    assert blank.status_code == 201
+    assert blank.json()["question_type"] == "FILL_BLANK"
+    assert blank.json()["accepted_answers"] == ["4", "four"]
+
+
+# ---------- Scheduling + randomization ----------
+def _publish_quiz(client, fac, body):
+    quiz_id = client.post("/api/quizzes", json=body, headers=fac).json()["id"]
+    for i in range(4):
+        client.post(
+            f"/api/quizzes/{quiz_id}/questions",
+            json={
+                "question_text": f"q{i}",
+                "options": [
+                    {"option_text": "a", "is_correct": True},
+                    {"option_text": "b", "is_correct": False},
+                ],
+            },
+            headers=fac,
+        )
+    client.patch(f"/api/quizzes/{quiz_id}/publish", json={"status": "PUBLISHED"}, headers=fac)
+    return quiz_id
+
+
+def test_schedule_gate_before_and_after_window(client, make_user, auth):
+    make_user("scfac@test.com", UserRole.FACULTY)
+    make_user("scst@test.com", UserRole.STUDENT)
+    fac, st = auth("scfac@test.com"), auth("scst@test.com")
+
+    upcoming = _publish_quiz(
+        client, fac,
+        {"title": "Upcoming", "duration_minutes": 5, "available_from": "2999-01-01T00:00:00Z"},
+    )
+    assert client.post(f"/api/quizzes/{upcoming}/start", headers=st).status_code == 403
+
+    closed = _publish_quiz(
+        client, fac,
+        {"title": "Closed", "duration_minutes": 5, "available_until": "2000-01-01T00:00:00Z"},
+    )
+    assert client.post(f"/api/quizzes/{closed}/start", headers=st).status_code == 403
+
+
+def test_shuffle_layout_is_frozen_across_resume(client, make_user, auth):
+    make_user("shfac@test.com", UserRole.FACULTY)
+    make_user("shst@test.com", UserRole.STUDENT)
+    fac, st = auth("shfac@test.com"), auth("shst@test.com")
+    quiz_id = _publish_quiz(
+        client, fac, {"title": "Shuf", "duration_minutes": 5, "shuffle_questions": True}
+    )
+    order1 = [q["id"] for q in client.post(f"/api/quizzes/{quiz_id}/start", headers=st).json()["questions"]]
+    order2 = [q["id"] for q in client.post(f"/api/quizzes/{quiz_id}/start", headers=st).json()["questions"]]
+    assert order1 == order2  # frozen layout on resume
+
+
+# ---------- Multi/blank submit + negative marking ----------
+def test_submit_multi_blank_with_negative_marking(client, make_user, auth):
+    make_user("nmfac@test.com", UserRole.FACULTY)
+    make_user("nmst@test.com", UserRole.STUDENT)
+    fac, st = auth("nmfac@test.com"), auth("nmst@test.com")
+    quiz_id = client.post(
+        "/api/quizzes",
+        json={
+            "title": "Mixed",
+            "duration_minutes": 5,
+            "passing_score": 50,
+            "negative_marking_enabled": True,
+            "negative_marks_per_wrong": 1,
+        },
+        headers=fac,
+    ).json()["id"]
+    multi = client.post(
+        f"/api/quizzes/{quiz_id}/questions",
+        json={
+            "question_text": "pick two",
+            "marks": 2,
+            "question_type": "MULTIPLE_CHOICE",
+            "options": [
+                {"option_text": "a", "is_correct": True},
+                {"option_text": "b", "is_correct": True},
+                {"option_text": "c", "is_correct": False},
+            ],
+        },
+        headers=fac,
+    ).json()
+    blank = client.post(
+        f"/api/quizzes/{quiz_id}/questions",
+        json={"question_text": "2+2", "question_type": "FILL_BLANK", "accepted_answers": ["4"]},
+        headers=fac,
+    ).json()
+    client.patch(f"/api/quizzes/{quiz_id}/publish", json={"status": "PUBLISHED"}, headers=fac)
+
+    start = client.post(f"/api/quizzes/{quiz_id}/start", headers=st).json()
+    multi_correct = [o["id"] for o in multi["options"] if o["is_correct"]]
+    r = client.post(
+        f"/api/quizzes/{quiz_id}/submit",
+        json={
+            "attempt_id": start["attempt_id"],
+            "answers": [
+                {"question_id": multi["id"], "selected_option_ids": multi_correct},
+                {"question_id": blank["id"], "text_answer": "  4 "},
+            ],
+        },
+        headers=st,
+    ).json()
+    assert r["correct_answers"] == 2
+    by_q = {rv["question_id"]: rv for rv in r["review"]}
+    assert by_q[multi["id"]]["question_type"] == "MULTIPLE_CHOICE"
+    assert by_q[multi["id"]]["is_correct"] is True
+    assert by_q[blank["id"]]["is_correct"] is True
+
+
 # ---------- Admin user management ----------
 def test_admin_user_management(client, make_user, auth):
     make_user("adm4@test.com", UserRole.ADMIN)

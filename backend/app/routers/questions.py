@@ -62,9 +62,12 @@ def create_question(
         marks=payload.marks,
         explanation=payload.explanation,
         difficulty=payload.difficulty,
+        question_type=payload.question_type,
+        accepted_answers=payload.accepted_answers,
         source=QuestionSource.MANUAL,
         options=[
-            Option(option_text=o.option_text, is_correct=o.is_correct) for o in payload.options
+            Option(option_text=o.option_text, is_correct=o.is_correct)
+            for o in (payload.options or [])
         ],
     )
     db.add(question)
@@ -83,9 +86,11 @@ def update_question(
     question = _get_question_or_404(db, question_id)
     ensure_can_manage_quiz(user, question.quiz)
     data = payload.model_dump(exclude_unset=True)
-    for field in ("question_text", "marks", "explanation", "difficulty"):
+    for field in ("question_text", "marks", "explanation", "difficulty", "question_type"):
         if field in data:
             setattr(question, field, data[field])
+    if "accepted_answers" in data:
+        question.accepted_answers = data["accepted_answers"]
     if payload.options is not None:
         # Replace the option set wholesale.
         question.options = [
