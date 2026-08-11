@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.enums import Difficulty, QuizStatus
+from app.models.enums import AttemptLayout, Difficulty, QuizStatus
 
 
 class QuizCreate(BaseModel):
@@ -15,6 +15,13 @@ class QuizCreate(BaseModel):
     passing_score: int = Field(default=60, ge=0, le=100)
     max_attempts: int = Field(default=1, ge=1, le=100)
     thumbnail_url: str | None = Field(default=None, max_length=500)
+    negative_marking_enabled: bool = False
+    negative_marks_per_wrong: float = Field(default=0.0, ge=0, le=100)
+    shuffle_questions: bool = False
+    shuffle_options: bool = False
+    available_from: datetime | None = None
+    available_until: datetime | None = None
+    attempt_layout: AttemptLayout = AttemptLayout.SCROLL
 
 
 class QuizUpdate(BaseModel):
@@ -27,6 +34,13 @@ class QuizUpdate(BaseModel):
     passing_score: int | None = Field(default=None, ge=0, le=100)
     max_attempts: int | None = Field(default=None, ge=1, le=100)
     thumbnail_url: str | None = Field(default=None, max_length=500)
+    negative_marking_enabled: bool | None = None
+    negative_marks_per_wrong: float | None = Field(default=None, ge=0, le=100)
+    shuffle_questions: bool | None = None
+    shuffle_options: bool | None = None
+    available_from: datetime | None = None
+    available_until: datetime | None = None
+    attempt_layout: AttemptLayout | None = None
 
 
 class PublishRequest(BaseModel):
@@ -48,6 +62,13 @@ class QuizOut(BaseModel):
     max_attempts: int
     status: QuizStatus
     thumbnail_url: str | None
+    negative_marking_enabled: bool
+    negative_marks_per_wrong: float
+    shuffle_questions: bool
+    shuffle_options: bool
+    available_from: datetime | None
+    available_until: datetime | None
+    attempt_layout: AttemptLayout
     created_at: datetime
     updated_at: datetime
 

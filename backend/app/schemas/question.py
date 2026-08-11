@@ -1,6 +1,6 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from app.models.enums import Difficulty, QuestionSource
+from app.models.enums import Difficulty, QuestionSource, QuestionType
 
 
 class OptionIn(BaseModel):
@@ -21,16 +21,37 @@ class QuestionBase(BaseModel):
     marks: int = Field(default=1, ge=1, le=100)
     explanation: str | None = None
     difficulty: Difficulty = Difficulty.INTERMEDIATE
+    question_type: QuestionType = QuestionType.SINGLE_CHOICE
+
+
+def _validate_by_type(qtype, options, accepted):
+    if qtype == QuestionType.FILL_BLANK:
+        if not accepted or not [a for a in accepted if a and a.strip()]:
+            raise ValueError("Fill-blank questions need at least one accepted answer")
+        return
+    if options is None:
+        raise ValueError("Choice questions need options")
+    n_correct = len([o for o in options if o.is_correct])
+    if qtype == QuestionType.TRUE_FALSE:
+        if len(options) != 2 or n_correct != 1:
+            raise ValueError("True/False needs exactly two options, one correct")
+    elif qtype == QuestionType.MULTIPLE_CHOICE:
+        if n_correct < 1:
+            raise ValueError("Multiple-choice needs at least one correct option")
+    else:  # SINGLE_CHOICE
+        if n_correct != 1:
+            raise ValueError("Exactly one option must be marked correct")
 
 
 class QuestionCreate(QuestionBase):
-    options: list[OptionIn] = Field(min_length=2, max_length=6)
+    options: list[OptionIn] | None = Field(default=None, max_length=6)
+    accepted_answers: list[str] | None = None
 
     @model_validator(mode="after")
-    def exactly_one_correct(self) -> "QuestionCreate":
-        correct = [o for o in self.options if o.is_correct]
-        if len(correct) != 1:
-            raise ValueError("Exactly one option must be marked correct")
+    def check(self) -> "QuestionCreate":
+        if self.question_type != QuestionType.FILL_BLANK and self.options and len(self.options) < 2:
+            raise ValueError("Choice questions need at least two options")
+        _validate_by_type(self.question_type, self.options, self.accepted_answers)
         return self
 
 
@@ -39,14 +60,14 @@ class QuestionUpdate(BaseModel):
     marks: int | None = Field(default=None, ge=1, le=100)
     explanation: str | None = None
     difficulty: Difficulty | None = None
-    options: list[OptionIn] | None = Field(default=None, min_length=2, max_length=6)
+    question_type: QuestionType | None = None
+    options: list[OptionIn] | None = Field(default=None, max_length=6)
+    accepted_answers: list[str] | None = None
 
     @model_validator(mode="after")
-    def validate_options(self) -> "QuestionUpdate":
-        if self.options is not None:
-            correct = [o for o in self.options if o.is_correct]
-            if len(correct) != 1:
-                raise ValueError("Exactly one option must be marked correct")
+    def check(self) -> "QuestionUpdate":
+        if self.question_type is not None:
+            _validate_by_type(self.question_type, self.options, self.accepted_answers)
         return self
 
 
@@ -56,4 +77,5 @@ class QuestionOut(QuestionBase):
     id: int
     quiz_id: int
     source: QuestionSource
+    accepted_answers: list[str] | None = None
     options: list[OptionOut]

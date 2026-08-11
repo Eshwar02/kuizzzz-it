@@ -94,6 +94,7 @@ def start_attempt(
         quiz_id=quiz.id,
         quiz_title=quiz.title,
         duration_minutes=quiz.duration_minutes,
+        attempt_layout=quiz.attempt_layout,
         started_at=existing.started_at,
         expires_at=_expires_at(existing, quiz),
         questions=[
@@ -101,6 +102,7 @@ def start_attempt(
                 id=q.id,
                 question_text=q.question_text,
                 marks=q.marks,
+                question_type=q.question_type,
                 options=[AttemptOption(id=o.id, option_text=o.option_text) for o in q.options],
             )
             for q in questions
