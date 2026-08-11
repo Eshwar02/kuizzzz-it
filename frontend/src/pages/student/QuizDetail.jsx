@@ -10,11 +10,13 @@ export default function QuizDetail() {
   const [quiz, setQuiz] = useState(null);
   const [attempts, setAttempts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     Promise.all([quizzesApi.get(id), attemptsApi.listMine()])
       .then(([q, all]) => { setQuiz(q); setAttempts(all.filter((a) => a.quiz_id === Number(id))); })
+      .catch(() => setLoadError(true))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -27,7 +29,12 @@ export default function QuizDetail() {
   };
 
   if (loading) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
-  if (!quiz) return null;
+  if (loadError || !quiz) return (
+    <div className="max-w-3xl space-y-4">
+      <Link to="/" className="text-sm text-violet-dark">← Back to browse</Link>
+      <Card title="Quiz unavailable">This quiz could not be loaded. It may have been unpublished or removed.</Card>
+    </div>
+  );
   const used = attempts.length;
   const canAttempt = used < quiz.max_attempts;
 
