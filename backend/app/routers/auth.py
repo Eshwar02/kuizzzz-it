@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -17,9 +17,16 @@ def _get_user_by_email(db: Session, email: str) -> User | None:
     return db.scalar(select(User).where(User.email == email.lower()))
 
 
-def _issue_token(user: User) -> Token:
+def _client_ip(request: Request) -> str | None:
+    forwarded = request.headers.get("x-forwarded-for")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else None
+
+
+def _issue_token(user: User, client_ip: str | None = None) -> Token:
     token = create_access_token(subject=str(user.id), role=user.role.value)
-    return Token(access_token=token, user=UserOut.model_validate(user))
+    return Token(access_token=token, user=UserOut.model_validate(user), client_ip=client_ip)
 
 
 @router.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED)
@@ -45,7 +52,7 @@ def register(payload: UserRegister, db: Session = Depends(get_db)) -> User:
 
 
 @router.post("/login", response_model=Token)
-def login(payload: LoginRequest, db: Session = Depends(get_db)) -> Token:
+def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)) -> Token:
     user = _get_user_by_email(db, payload.email)
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(
@@ -56,15 +63,15 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)) -> Token:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is not active. Contact an administrator.",
         )
-    return _issue_token(user)
+    return _issue_token(user, _client_ip(request))
 
 
 @router.post("/login/token", response_model=Token, include_in_schema=False)
 def login_form(
-    form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    request: Request, form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ) -> Token:
     """OAuth2 password-flow endpoint so Swagger 'Authorize' works (username=email)."""
-    return login(LoginRequest(email=form.username, password=form.password), db)
+    return login(LoginRequest(email=form.username, password=form.password), request, db)
 
 
 @router.post("/logout")
