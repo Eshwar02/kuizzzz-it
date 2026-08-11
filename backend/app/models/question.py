@@ -1,8 +1,8 @@
-from sqlalchemy import Boolean, Enum as SAEnum, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Enum as SAEnum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
-from app.models.enums import Difficulty, QuestionSource
+from app.models.enums import Difficulty, QuestionSource, QuestionType
 
 
 class Question(Base, TimestampMixin):
@@ -23,6 +23,12 @@ class Question(Base, TimestampMixin):
         default=QuestionSource.MANUAL,
         nullable=False,
     )
+    question_type: Mapped[QuestionType] = mapped_column(
+        SAEnum(QuestionType, name="question_type"),
+        default=QuestionType.SINGLE_CHOICE,
+        nullable=False,
+    )
+    accepted_answers: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
     quiz: Mapped["Quiz"] = relationship(back_populates="questions")  # noqa: F821
     options: Mapped[list["Option"]] = relationship(

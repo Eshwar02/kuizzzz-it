@@ -45,3 +45,15 @@ class AIJobStatus(str, enum.Enum):
     COMPLETED = "COMPLETED"
     FAILED = "FAILED"
     APPROVED = "APPROVED"
+
+
+class QuestionType(str, enum.Enum):
+    SINGLE_CHOICE = "SINGLE_CHOICE"
+    MULTIPLE_CHOICE = "MULTIPLE_CHOICE"
+    TRUE_FALSE = "TRUE_FALSE"
+    FILL_BLANK = "FILL_BLANK"
+
+
+class AttemptLayout(str, enum.Enum):
+    SCROLL = "SCROLL"
+    PAGED = "PAGED"

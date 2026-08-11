@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.core.deps import get_current_user, require_role
 from app.db.session import get_db
 from app.models.attempt import Answer, Attempt
-from app.models.enums import AttemptStatus, QuizStatus, UserRole
+from app.models.enums import AttemptStatus, QuestionType, QuizStatus, UserRole
 from app.models.question import Question
 from app.models.quiz import Quiz
 from app.models.user import User
@@ -94,6 +94,7 @@ def start_attempt(
         quiz_id=quiz.id,
         quiz_title=quiz.title,
         duration_minutes=quiz.duration_minutes,
+        attempt_layout=quiz.attempt_layout,
         started_at=existing.started_at,
         expires_at=_expires_at(existing, quiz),
         questions=[
@@ -101,6 +102,7 @@ def start_attempt(
                 id=q.id,
                 question_text=q.question_text,
                 marks=q.marks,
+                question_type=q.question_type,
                 options=[AttemptOption(id=o.id, option_text=o.option_text) for o in q.options],
             )
             for q in questions
@@ -128,17 +130,34 @@ def submit_attempt(
     valid_question_ids = {q.id for q in questions}
     option_to_question = {o.id: q.id for q in questions for o in q.options}
 
-    # Build a clean selections map: keep only options that belong to their question.
-    selections: dict[int, int | None] = {}
+    # Build typed selections per question type, ignoring spoofed option ids.
+    qtype = {q.id: q.question_type for q in questions}
+    selections: dict[int, scoring.TypedSelection] = {}
     for ans in payload.answers:
         if ans.question_id not in valid_question_ids:
             continue
-        opt = ans.selected_option_id
-        if opt is not None and option_to_question.get(opt) != ans.question_id:
-            opt = None  # ignore spoofed option ids
-        selections[ans.question_id] = opt
+        t = qtype[ans.question_id]
+        if t == QuestionType.FILL_BLANK:
+            selections[ans.question_id] = scoring.TypedSelection(text=ans.text_answer)
+        elif t == QuestionType.MULTIPLE_CHOICE:
+            clean = [
+                oid
+                for oid in (ans.selected_option_ids or [])
+                if option_to_question.get(oid) == ans.question_id
+            ]
+            selections[ans.question_id] = scoring.TypedSelection(option_ids=clean)
+        else:
+            opt = ans.selected_option_id
+            if opt is not None and option_to_question.get(opt) != ans.question_id:
+                opt = None
+            selections[ans.question_id] = scoring.TypedSelection(option_id=opt)
 
-    result = scoring.grade(questions, selections, quiz.passing_score)
+    result = scoring.grade(
+        questions,
+        selections,
+        quiz.passing_score,
+        negative_marks=quiz.negative_marks_per_wrong if quiz.negative_marking_enabled else 0.0,
+    )
 
     # Backend-authoritative timing: cap at the allotted duration (auto-submit at expiry).
     now = _now()
@@ -152,6 +171,8 @@ def submit_attempt(
                 attempt_id=attempt.id,
                 question_id=ga.question_id,
                 selected_option_id=ga.selected_option_id,
+                selected_option_ids=ga.selected_option_ids,
+                text_answer=ga.text_answer,
                 is_correct=ga.is_correct,
             )
         )
@@ -213,21 +234,28 @@ def _build_result(
         select(Answer).where(Answer.attempt_id == attempt.id)
     ).all()
     selected_by_q = {a.question_id: a.selected_option_id for a in answers}
+    selected_ids_by_q = {a.question_id: a.selected_option_ids for a in answers}
+    text_by_q = {a.question_id: a.text_answer for a in answers}
     correct_by_q = {a.question_id: a.is_correct for a in answers}
 
     review: list[AnswerReview] = []
     total_marks = 0
     for q in questions:
         total_marks += q.marks
-        correct_option_id = next((o.id for o in q.options if o.is_correct), None)
+        correct_ids = [o.id for o in q.options if o.is_correct]
         review.append(
             AnswerReview(
                 question_id=q.id,
                 question_text=q.question_text,
                 explanation=q.explanation,
                 marks=q.marks,
+                question_type=q.question_type,
                 selected_option_id=selected_by_q.get(q.id),
-                correct_option_id=correct_option_id,
+                correct_option_id=correct_ids[0] if correct_ids else None,
+                correct_option_ids=correct_ids,
+                accepted_answers=q.accepted_answers,
+                selected_option_ids=selected_ids_by_q.get(q.id),
+                text_answer=text_by_q.get(q.id),
                 is_correct=correct_by_q.get(q.id, False),
                 options=[AttemptOption(id=o.id, option_text=o.option_text) for o in q.options],
             )

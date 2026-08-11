@@ -1,10 +1,20 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum as SAEnum, ForeignKey, Integer, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Enum as SAEnum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
-from app.models.enums import Difficulty, QuizStatus
+from app.models.enums import AttemptLayout, Difficulty, QuizStatus
 
 
 class Quiz(Base, TimestampMixin):
@@ -30,6 +40,19 @@ class Quiz(Base, TimestampMixin):
         SAEnum(QuizStatus, name="quiz_status"), default=QuizStatus.DRAFT, nullable=False
     )
     thumbnail_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    negative_marking_enabled: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    negative_marks_per_wrong: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
+    shuffle_questions: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    shuffle_options: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    available_from: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    available_until: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    attempt_layout: Mapped[AttemptLayout] = mapped_column(
+        SAEnum(AttemptLayout, name="attempt_layout"),
+        default=AttemptLayout.SCROLL,
+        nullable=False,
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )

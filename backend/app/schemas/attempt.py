@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.enums import AttemptStatus
+from app.models.enums import AttemptLayout, AttemptStatus, QuestionType
 
 
 # ---- Taking a quiz (no correct-answer data exposed) ----
@@ -15,7 +15,8 @@ class AttemptQuestion(BaseModel):
     id: int
     question_text: str
     marks: int
-    options: list[AttemptOption]
+    question_type: QuestionType
+    options: list[AttemptOption] = []
 
 
 class StartAttemptResponse(BaseModel):
@@ -23,6 +24,7 @@ class StartAttemptResponse(BaseModel):
     quiz_id: int
     quiz_title: str
     duration_minutes: int
+    attempt_layout: AttemptLayout
     started_at: datetime
     expires_at: datetime
     questions: list[AttemptQuestion]
@@ -31,6 +33,8 @@ class StartAttemptResponse(BaseModel):
 class SubmittedAnswer(BaseModel):
     question_id: int
     selected_option_id: int | None = None
+    selected_option_ids: list[int] | None = None
+    text_answer: str | None = None
 
 
 class SubmitAttemptRequest(BaseModel):
@@ -64,8 +68,13 @@ class AnswerReview(BaseModel):
     question_text: str
     explanation: str | None
     marks: int
+    question_type: QuestionType = QuestionType.SINGLE_CHOICE
     selected_option_id: int | None
     correct_option_id: int | None
+    correct_option_ids: list[int] = Field(default_factory=list)
+    accepted_answers: list[str] | None = None
+    selected_option_ids: list[int] | None = None
+    text_answer: str | None = None
     is_correct: bool
     options: list[AttemptOption]
 
