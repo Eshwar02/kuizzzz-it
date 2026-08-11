@@ -18,17 +18,16 @@ Items intentionally deferred from the Core MVP. Grouped by area. See
 - [ ] Configurable max-attempts enforcement UI polish.
 
 ## Quiz-Taking UI — Google-Forms style (planned during frontend step)
-- [ ] Render the attempt panel like Google Forms, not plain text: the input control
-      is chosen by the question **type/mode set by faculty**:
-      - Single-choice (MCQ) → **radio buttons**
-      - Multiple-correct → **checkboxes**
-      - Fill-in-the-blank → **text blank input**
+- [x] Render the attempt panel like Google Forms, not plain text: single-choice
+      (MCQ) renders as **radio buttons** (done — matches current backend).
+      - Multiple-correct → **checkboxes** *(deferred: needs backend type support)*
+      - Fill-in-the-blank → **text blank input** *(deferred: needs backend type support)*
 - [ ] Faculty question editor lets them pick the question type (drives the control).
       (Backend currently supports single-correct MCQ; multiple-correct and
       fill-in-the-blank types must be added to models/scoring — see question types below.)
-- [ ] Right-side **scratchpad / workout space** next to the question: a rough area
+- [x] Right-side **scratchpad / workout space** next to the question: a rough area
       for rough work, supporting both **freehand drawing** (canvas) and **typed** notes.
-      Per-question or per-quiz; not graded, not submitted (local only for MVP).
+      Per-question; not graded, not submitted (local-only, persisted to localStorage).
 
 ## Classes / Enrollment (design option "C")
 - [ ] Class/section entity.
@@ -49,13 +48,14 @@ Items intentionally deferred from the Core MVP. Grouped by area. See
 - [ ] CSV/Excel question import.
 
 ## Security — Login IP Logging (planned during frontend step)
-- [ ] **Backend:** on login, capture the client IP (`request.client.host`, honoring
-      `X-Forwarded-For` when behind a proxy). Return the detected IP in the login
-      response. For FACULTY and ADMIN logins, persist a `login_events` record
-      (user_id, ip, user_agent, timestamp) for audit/misuse detection.
-- [ ] **Frontend:** in the login box, display the user's detected IP address with a
-      note: *"Your IP address is collected for security purposes and to prevent
-      account misuse."* Emphasize this for faculty/admin logins.
+- [x] **Backend:** on login, capture the client IP (`request.client.host`, honoring
+      `X-Forwarded-For` first hop) and return it as `client_ip` in the login response.
+      - [ ] *Deferred:* for FACULTY and ADMIN logins, persist a `login_events` record
+        (user_id, ip, user_agent, timestamp) for audit/misuse detection.
+- [x] **Frontend:** the login box shows a security notice, and on sign-in a
+      confirmation panel displays the user's detected IP with the note *"Your IP
+      address is collected for security purposes and to prevent account misuse."*
+      Emphasized for faculty/admin logins. (Backend returns `client_ip` on login.)
 - [ ] (Later) alert/lock on logins from unexpected IPs for privileged accounts.
 
 ## UX / Platform
