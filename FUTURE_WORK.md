@@ -34,10 +34,17 @@ See `docs/superpowers/specs/2026-08-11-assessment-engine-v2-design.md`.
       for rough work, supporting both **freehand drawing** (canvas) and **typed** notes.
       Per-question; not graded, not submitted (local-only, persisted to localStorage).
 
-## Classes / Enrollment (design option "C")
-- [ ] Class/section entity.
-- [ ] Faculty own classes; assign quizzes to a class.
-- [ ] Student enrollment; students only see quizzes assigned to their class.
+## Classes / Enrollment
+- [x] Class/section entity (name, section, subject, theme color, join code, owner).
+- [x] Faculty own classes; co-teachers supported; admin has full oversight.
+- [x] Student enrollment by join code; students can leave; faculty/admin remove.
+- [ ] Assign quizzes to a class — **slice B**: audience = open-to-all / whole-class /
+      selected students (differentiated by performance). Students then see
+      open-to-all quizzes ∪ quizzes assigned to them.
+- [ ] Home big-cards page showing enrolled classes + pending assessments (slice C).
+- [ ] To-do / pending-assessment notifications for students (slice D).
+
+See `docs/superpowers/specs/2026-08-11-classrooms-design.md`.
 
 ## AI Enhancements (Mistral)
 - [ ] Auto-difficulty calibration from past attempt data.
