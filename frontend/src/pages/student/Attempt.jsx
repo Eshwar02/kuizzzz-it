@@ -23,7 +23,7 @@ export default function Attempt() {
   }, [quizId]);
 
   const doSubmit = async () => {
-    if (submittedRef.current) return;
+    if (submittedRef.current || !data) return;
     submittedRef.current = true;
     setSubmitting(true);
     const payload = {
@@ -42,7 +42,7 @@ export default function Attempt() {
 
   if (!data) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
 
-  const answeredCount = Object.values(answers).filter(Boolean).length;
+  const answeredCount = Object.values(answers).filter((v) => v != null).length;
 
   return (
     <div className="space-y-4">
