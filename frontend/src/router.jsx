@@ -46,8 +46,8 @@ export const router = createBrowserRouter([
             { path: "/dashboard", element: <StudentDashboard /> },
             { path: "/leaderboard", element: <Leaderboard /> },
           ]},
-          // Faculty
-          { element: <RoleRoute roles={["FACULTY", "ADMIN"]} />, children: [
+          // Faculty (authoring belongs to faculty; admins manage users/categories/analytics)
+          { element: <RoleRoute roles={["FACULTY"]} />, children: [
             { path: "/faculty", element: <FacultyDashboard /> },
             { path: "/faculty/quizzes", element: <MyQuizzes /> },
             { path: "/faculty/quizzes/new", element: <QuizForm /> },
