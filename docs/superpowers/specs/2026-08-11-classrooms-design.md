@@ -146,6 +146,20 @@ pytest (`backend/tests/test_classrooms.py`, new):
 Existing suites must stay green. Frontend: manual smoke — faculty creates a class,
 copies the code; student joins; both see the card; co-teacher add; admin oversight.
 
+## Captured for Slice B (quiz assignment) — not built here
+
+A quiz needs **no** classroom to exist. When a faculty creates/publishes a quiz,
+its audience is one of:
+1. **Open-to-all** — any student can discover/attempt (today's behavior).
+2. **Whole class** — assigned to every student enrolled in a chosen classroom.
+3. **Selected members** — assigned to a faculty-picked subset of a classroom's
+   students (differentiated assignment: harder/easier sets by prior performance,
+   targeted remediation/enrichment).
+
+Slice B will model this (likely a `quiz_assignments` table + an audience flag on the
+quiz) and change student discovery to: open-to-all ∪ quizzes assigned to me. This
+note only preserves the requirement; Slice A builds classrooms/enrollment only.
+
 ## Build Order (backend first)
 
 1. Models + one Alembic migration (3 tables); apply to dev DB.
