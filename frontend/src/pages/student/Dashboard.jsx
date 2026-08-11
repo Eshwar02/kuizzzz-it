@@ -12,7 +12,7 @@ export default function StudentDashboard() {
   const columns = [
     { key: "quiz_title", header: "Quiz" },
     { key: "percentage", header: "Score", render: (r) => fmtPct(r.percentage) },
-    { key: "status", header: "Status", render: (r) => <Badge tone={r.status === "PASSED" ? "green" : "red"}>{r.status}</Badge> },
+    { key: "status", header: "Status", render: (r) => <Badge tone={r.status === "PASSED" ? "green" : r.status === "FAILED" ? "red" : "amber"}>{r.status}</Badge> },
     { key: "completed_at", header: "When", render: (r) => fmtDate(r.completed_at) },
     { key: "actions", header: "", render: (r) => <Link to={`/results/${r.attempt_id}`} className="text-violet-dark">Review</Link> },
   ];

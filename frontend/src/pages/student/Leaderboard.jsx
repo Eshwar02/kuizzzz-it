@@ -13,7 +13,7 @@ export default function Leaderboard() {
     setRows(null);
     const params = { limit: 50 };
     if (categoryId) params.category_id = Number(categoryId);
-    leaderboardApi.list(params).then(setRows);
+    leaderboardApi.list(params).then(setRows).catch(() => setRows([]));
   }, [categoryId]);
 
   const columns = [
