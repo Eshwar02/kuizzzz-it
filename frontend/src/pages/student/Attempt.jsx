@@ -6,21 +6,30 @@ import { useCountdown } from "../../lib/useCountdown";
 import Timer from "../../components/quiz/Timer";
 import Scratchpad from "../../components/quiz/Scratchpad";
 import AttemptQuestionCard from "../../components/quiz/AttemptQuestionCard";
+import QuestionPalette from "../../components/quiz/QuestionPalette";
 
 export default function Attempt() {
   const { quizId } = useParams();
   const navigate = useNavigate();
   const [data, setData] = useState(null);
-  const [answers, setAnswers] = useState({}); // question_id -> option_id
-  const [activeQ, setActiveQ] = useState(null); // question id for scratchpad focus
+  const [answers, setAnswers] = useState({}); // question_id -> id | id[] | string
+  const [current, setCurrent] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const submittedRef = useRef(false);
+  const cardRefs = useRef({});
 
   useEffect(() => {
-    attemptsApi.start(quizId).then((d) => { setData(d); setActiveQ(d.questions[0]?.id ?? null); })
+    attemptsApi.start(quizId).then((d) => setData(d))
       .catch(() => navigate(`/quizzes/${quizId}`));
   }, [quizId]);
+
+  const isAnswered = (q) => {
+    const v = answers[q.id];
+    if (q.question_type === "MULTIPLE_CHOICE") return Array.isArray(v) && v.length > 0;
+    if (q.question_type === "FILL_BLANK") return typeof v === "string" && v.trim() !== "";
+    return v != null;
+  };
 
   const doSubmit = async () => {
     if (submittedRef.current || !data) return;
@@ -28,7 +37,12 @@ export default function Attempt() {
     setSubmitting(true);
     const payload = {
       attempt_id: data.attempt_id,
-      answers: data.questions.map((q) => ({ question_id: q.id, selected_option_id: answers[q.id] ?? null })),
+      answers: data.questions.map((q) => {
+        const v = answers[q.id];
+        if (q.question_type === "MULTIPLE_CHOICE") return { question_id: q.id, selected_option_ids: v || [] };
+        if (q.question_type === "FILL_BLANK") return { question_id: q.id, text_answer: v ?? "" };
+        return { question_id: q.id, selected_option_id: v ?? null };
+      }),
     };
     try {
       const result = await attemptsApi.submit(quizId, payload);
@@ -42,7 +56,15 @@ export default function Attempt() {
 
   if (!data) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
 
-  const answeredCount = Object.values(answers).filter((v) => v != null).length;
+  const paged = data.attempt_layout === "PAGED";
+  const answeredCount = data.questions.filter(isAnswered).length;
+  const activeQ = data.questions[current]?.id ?? null;
+  const setAnswer = (qid, val) => setAnswers((a) => ({ ...a, [qid]: val }));
+
+  const jump = (i) => {
+    setCurrent(i);
+    if (!paged) cardRefs.current[data.questions[i].id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="space-y-4">
@@ -59,18 +81,39 @@ export default function Attempt() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4">
         <div className="space-y-4">
-          {data.questions.map((q, i) => (
-            <div key={q.id} onFocusCapture={() => setActiveQ(q.id)} onClick={() => setActiveQ(q.id)}>
+          {paged ? (
+            <>
               <AttemptQuestionCard
-                index={i}
-                question={q}
-                selected={answers[q.id] ?? null}
-                onSelect={(qid, oid) => setAnswers((a) => ({ ...a, [qid]: oid }))}
+                index={current}
+                question={data.questions[current]}
+                selected={answers[activeQ] ?? null}
+                onSelect={setAnswer}
               />
-            </div>
-          ))}
+              <div className="flex items-center justify-between">
+                <Button variant="secondary" onClick={() => jump(current - 1)} disabled={current === 0}>← Previous</Button>
+                <span className="text-sm text-ink/60">Question {current + 1} of {data.questions.length}</span>
+                {current < data.questions.length - 1
+                  ? <Button onClick={() => jump(current + 1)}>Next →</Button>
+                  : <Button onClick={() => setConfirmOpen(true)} disabled={submitting}>Submit</Button>}
+              </div>
+            </>
+          ) : (
+            data.questions.map((q, i) => (
+              <div key={q.id} onFocusCapture={() => setCurrent(i)} onClick={() => setCurrent(i)}>
+                <AttemptQuestionCard
+                  ref={(el) => { cardRefs.current[q.id] = el; }}
+                  index={i}
+                  question={q}
+                  selected={answers[q.id] ?? null}
+                  onSelect={setAnswer}
+                />
+              </div>
+            ))
+          )}
         </div>
-        <div className="lg:sticky lg:top-20 h-fit">
+
+        <div className="lg:sticky lg:top-20 h-fit space-y-4">
+          <QuestionPalette questions={data.questions} isAnswered={isAnswered} current={current} onJump={jump} />
           {activeQ != null && <Scratchpad attemptId={data.attempt_id} questionId={activeQ} />}
         </div>
       </div>

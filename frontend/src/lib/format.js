@@ -6,3 +6,11 @@ export const fmtDuration = (secs) => {
   const m = Math.floor(s / 60);
   return `${m}m ${s % 60}s`;
 };
+
+// "UPCOMING" | "CLOSED" | "OPEN" from a quiz's availability window.
+export const scheduleState = (quiz) => {
+  const now = Date.now();
+  if (quiz.available_from && now < new Date(quiz.available_from).getTime()) return "UPCOMING";
+  if (quiz.available_until && now > new Date(quiz.available_until).getTime()) return "CLOSED";
+  return "OPEN";
+};
