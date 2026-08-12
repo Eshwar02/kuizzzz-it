@@ -31,7 +31,7 @@ export default function QuizDetail() {
   if (loading) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
   if (loadError || !quiz) return (
     <div className="max-w-3xl space-y-4">
-      <Link to="/" className="text-sm text-violet-dark">← Back to browse</Link>
+      <Link to="/browse" className="text-sm text-violet-dark">← Back to browse</Link>
       <Card title="Quiz unavailable">This quiz could not be loaded. It may have been unpublished or removed.</Card>
     </div>
   );
@@ -41,7 +41,7 @@ export default function QuizDetail() {
 
   return (
     <div className="space-y-4 max-w-3xl">
-      <Link to="/" className="text-sm text-violet-dark">← Back to browse</Link>
+      <Link to="/browse" className="text-sm text-violet-dark">← Back to browse</Link>
       <Card title={quiz.title} actions={
         <span className="flex items-center gap-1.5">
           {sched === "UPCOMING" && <Badge tone="amber">Upcoming</Badge>}

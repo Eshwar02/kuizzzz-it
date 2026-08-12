@@ -3,10 +3,10 @@ import { useAuth } from "../../auth/AuthContext";
 
 const NAV = {
   STUDENT: [
-    ["/", "Browse"], ["/classes", "Classes"], ["/my-attempts", "My Attempts"], ["/leaderboard", "Leaderboard"], ["/dashboard", "Dashboard"],
+    ["/", "Home"], ["/browse", "Browse"], ["/classes", "Classes"], ["/my-attempts", "My Attempts"], ["/leaderboard", "Leaderboard"], ["/dashboard", "Dashboard"],
   ],
   FACULTY: [
-    ["/faculty", "Dashboard"], ["/faculty/quizzes", "My Quizzes"], ["/faculty/classes", "Classes"], ["/faculty/ai", "AI Generate"],
+    ["/faculty", "Home"], ["/faculty/dashboard", "Dashboard"], ["/faculty/quizzes", "My Quizzes"], ["/faculty/classes", "Classes"], ["/faculty/ai", "AI Generate"],
   ],
   ADMIN: [
     ["/admin", "Dashboard"], ["/admin/users", "Users"], ["/admin/categories", "Categories"],

@@ -6,6 +6,8 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import NotFound from "./pages/NotFound";
 
+import StudentHome from "./pages/student/Home";
+import FacultyHome from "./pages/faculty/Home";
 import Browse from "./pages/student/Browse";
 import QuizDetail from "./pages/student/QuizDetail";
 import Attempt from "./pages/student/Attempt";
@@ -45,7 +47,8 @@ export const router = createBrowserRouter([
           { path: "/classes/:id", element: <ClassroomDetail /> },
           // Student
           { element: <RoleRoute roles={["STUDENT"]} />, children: [
-            { path: "/", element: <Browse /> },
+            { path: "/", element: <StudentHome /> },
+            { path: "/browse", element: <Browse /> },
             { path: "/quizzes/:id", element: <QuizDetail /> },
             { path: "/attempt/:quizId", element: <Attempt /> },
             { path: "/results/:attemptId", element: <Result /> },
@@ -56,7 +59,8 @@ export const router = createBrowserRouter([
           ]},
           // Faculty (authoring belongs to faculty; admins manage users/categories/analytics)
           { element: <RoleRoute roles={["FACULTY"]} />, children: [
-            { path: "/faculty", element: <FacultyDashboard /> },
+            { path: "/faculty", element: <FacultyHome /> },
+            { path: "/faculty/dashboard", element: <FacultyDashboard /> },
             { path: "/faculty/quizzes", element: <MyQuizzes /> },
             { path: "/faculty/quizzes/new", element: <QuizForm /> },
             { path: "/faculty/quizzes/:id/edit", element: <QuizForm /> },

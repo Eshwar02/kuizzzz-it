@@ -69,7 +69,7 @@ export default function Result() {
 
       <div className="flex gap-2">
         <Link to="/my-attempts"><Button variant="secondary">My attempts</Button></Link>
-        <Link to="/"><Button>Browse more</Button></Link>
+        <Link to="/browse"><Button>Browse more</Button></Link>
       </div>
     </div>
   );
