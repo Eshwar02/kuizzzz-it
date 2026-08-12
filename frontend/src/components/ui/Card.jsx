@@ -1,9 +1,15 @@
-export default function Card({ title, actions, children, className = "" }) {
+export default function Card({ title, actions, children, className = "", accent, icon: Icon }) {
   return (
-    <section className={`bg-card border border-ink/15 rounded-sm ${className}`}>
+    <section
+      className={`card-soft ${accent ? "border-l-[3px]" : ""} ${className}`}
+      style={accent ? { borderLeftColor: accent } : undefined}
+    >
       {(title || actions) && (
         <header className="flex items-center justify-between border-b border-ink/10 px-4 py-3">
-          {title && <h2 className="font-semibold text-ink">{title}</h2>}
+          <h2 className="font-semibold text-ink flex items-center gap-2">
+            {Icon && <Icon size={18} className="text-violet" />}
+            {title}
+          </h2>
           {actions}
         </header>
       )}

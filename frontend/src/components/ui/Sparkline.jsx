@@ -1,6 +1,6 @@
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 
-export default function Sparkline({ data = [], tone = "#8B7BB8", height = 40 }) {
+export default function Sparkline({ data = [], tone = "#5549DA", height = 40 }) {
   const series = data.map((y, i) => ({ i, y }));
   if (series.length < 2) return <div style={{ height }} />;
   return (

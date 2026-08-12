@@ -2,7 +2,7 @@ export default function Table({ columns, rows, empty = "No records." }) {
   return (
     <div className="overflow-x-auto border border-ink/15 rounded-sm">
       <table className="w-full text-sm">
-        <thead className="bg-surface border-b border-ink/15">
+        <thead className="bg-surface border-b border-ink/15 sticky top-0">
           <tr>
             {columns.map((c) => (
               <th key={c.key} className="text-left font-semibold text-ink/70 px-3 py-2">{c.header}</th>
