@@ -55,6 +55,11 @@ The platform is built to be deployed as a real product: relational data model, d
 - Students see open-to-all quizzes plus those assigned to them; access is enforced on listing, detail, and attempt-start — a non-targeted student cannot open or start an assigned quiz.
 - A **Home** of class cards per role, a student **to-do list** of pending assessments (with due date and attempts left), and a **topbar badge** for the pending count.
 
+### Interface
+- A cohesive indigo design system: soft-shadowed cards, professional buttons (filled / outline / text + gradient call-to-action), icon-led navigation with a fixed sidebar and a scroll-only content area.
+- Data-rich screens: role **Home** with a greeting hero + class cards + to-do, dashboards with score **gauges**, pass/fail **donut** and trend **sparklines**, a result page with a circular score gauge and per-type breakdown bars, and a leaderboard **podium** for the top three.
+- Polished details throughout: avatars, status badges, skeleton loaders, and illustrated empty states.
+
 ### Insights
 - Admin dashboard (totals, pass/fail, average score) and analytics (attempts/registrations over time, popular quizzes & categories).
 - Student and faculty dashboards.
