@@ -38,11 +38,12 @@ See `docs/superpowers/specs/2026-08-11-assessment-engine-v2-design.md`.
 - [x] Class/section entity (name, section, subject, theme color, join code, owner).
 - [x] Faculty own classes; co-teachers supported; admin has full oversight.
 - [x] Student enrollment by join code; students can leave; faculty/admin remove.
-- [ ] Assign quizzes to a class — **slice B**: audience = open-to-all / whole-class /
-      selected students (differentiated by performance). Students then see
-      open-to-all quizzes ∪ quizzes assigned to them.
-- [ ] Home big-cards page showing enrolled classes + pending assessments (slice C).
-- [ ] To-do / pending-assessment notifications for students (slice D).
+- [x] Assign quizzes to a class — audience = open-to-all / whole-class / selected
+      students. Students see open-to-all ∪ quizzes assigned to them; access enforced on
+      list, detail, and attempt-start.
+- [x] Home big-cards page showing enrolled/taught classes (+ pending count per class).
+- [x] To-do / pending-assessment list for students + topbar badge (reuses the quiz
+      availability window; no email/push).
 
 See `docs/superpowers/specs/2026-08-11-classrooms-design.md`.
 

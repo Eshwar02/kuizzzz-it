@@ -8,7 +8,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.118-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Tests](https://img.shields.io/badge/tests-32%20passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-37%20passing-brightgreen)](#testing)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 </div>
@@ -49,6 +49,11 @@ The platform is built to be deployed as a real product: relational data model, d
 - **Co-teachers** — an owner can add other faculty to help run a class.
 - **Admin oversight** — admins see every class with its owner and member counts, and can reassign ownership or remove a class.
 - Reusable class cards and a per-class roster; membership and access enforced server-side (students never see a class's join code or roster).
+
+### Quiz Assignment & Home
+- A quiz is **open to all** or **assigned** to one-or-more classes, each targeting the **whole class** or a **selected subset** of students (differentiated assignment by performance).
+- Students see open-to-all quizzes plus those assigned to them; access is enforced on listing, detail, and attempt-start — a non-targeted student cannot open or start an assigned quiz.
+- A **Home** of class cards per role, a student **to-do list** of pending assessments (with due date and attempts left), and a **topbar badge** for the pending count.
 
 ### Insights
 - Admin dashboard (totals, pass/fail, average score) and analytics (attempts/registrations over time, popular quizzes & categories).
@@ -222,6 +227,7 @@ The suite runs each test inside a database transaction that is rolled back on te
 | Attempts | `POST /api/quizzes/{id}/start` · `POST /api/quizzes/{id}/submit` · `GET /api/attempts` · `GET /api/attempts/{id}` |
 | Dashboards | `GET /api/dashboard/student` · `GET /api/dashboard/faculty` · `GET /api/admin/dashboard` · `GET /api/admin/analytics` · `GET /api/admin/attempts` |
 | Classrooms | `GET/POST /api/classrooms` · `GET/PUT/DELETE /api/classrooms/{id}` · `POST /api/classrooms/join` · `DELETE /api/classrooms/{id}/leave` · teachers/students/owner/code sub-routes · `GET /api/admin/classrooms` |
+| Assignments | `GET/PUT /api/quizzes/{id}/assignments` · `GET /api/assignments/todo` |
 | Leaderboard | `GET /api/leaderboard` |
 
 Full, always-current schema is available at `/docs` (Swagger) and `/openapi.json`.
@@ -262,7 +268,7 @@ Planned hardening (rate limiting, security headers, refresh-token rotation, logi
 
 ## Roadmap
 
-See [`FUTURE_WORK.md`](FUTURE_WORK.md) for the full list. In active development: **targeted quiz assignment** (open-to-all, whole-class, or selected students — differentiated by performance), a **home dashboard** of enrolled classes with pending assessments, and a student **to-do list**. Further ahead: certificates, email notifications, CSV/Excel import, dark mode, and login-IP audit logging.
+See [`FUTURE_WORK.md`](FUTURE_WORK.md) for the full list. In active development: **email-verified faculty/admin signup** with role-lock. Further ahead: certificates, email notifications, CSV/Excel import, dark mode, and login-IP audit logging.
 
 ## License
 
