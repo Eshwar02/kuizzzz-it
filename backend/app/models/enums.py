@@ -57,3 +57,8 @@ class QuestionType(str, enum.Enum):
 class AttemptLayout(str, enum.Enum):
     SCROLL = "SCROLL"
     PAGED = "PAGED"
+
+
+class QuizVisibility(str, enum.Enum):
+    OPEN = "OPEN"
+    ASSIGNED = "ASSIGNED"

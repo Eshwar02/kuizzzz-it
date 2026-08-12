@@ -9,30 +9,43 @@ Items intentionally deferred from the Core MVP. Grouped by area. See
 - [ ] Faculty self-registration approval queue UI (MVP: admin creates/approves directly).
 
 ## Quiz & Assessment Features
-- [ ] Negative marking (e.g. correct +2, wrong -0.5, skipped 0).
-- [ ] Quiz scheduling (start date, end date, availability windows).
-- [ ] Question randomization per attempt.
-- [ ] Option randomization per question.
-- [ ] Additional question types: multiple-correct, true/false, fill-in-the-blank,
-      match-the-following, image-based, code-based.
+- [x] Negative marking (fixed per-quiz penalty per wrong; total clamped at ≥ 0).
+      *(PDF's -0.5-style flat penalty; skipped = 0.)*
+- [x] Quiz scheduling (available_from / available_until window; start gated backend-side).
+- [x] Question randomization per attempt (per-quiz `shuffle_questions`, frozen per attempt).
+- [x] Option randomization per question (per-quiz `shuffle_options`, frozen per attempt).
+- [x] Additional question types: multiple-correct (all-or-nothing), true/false,
+      fill-in-the-blank (case-insensitive, multiple accepted answers).
+      - [ ] Still deferred: match-the-following, image-based, code-based.
 - [ ] Configurable max-attempts enforcement UI polish.
+
+See `docs/superpowers/specs/2026-08-11-assessment-engine-v2-design.md`.
 
 ## Quiz-Taking UI — Google-Forms style (planned during frontend step)
 - [x] Render the attempt panel like Google Forms, not plain text: single-choice
       (MCQ) renders as **radio buttons** (done — matches current backend).
       - Multiple-correct → **checkboxes** *(deferred: needs backend type support)*
       - Fill-in-the-blank → **text blank input** *(deferred: needs backend type support)*
-- [ ] Faculty question editor lets them pick the question type (drives the control).
-      (Backend currently supports single-correct MCQ; multiple-correct and
-      fill-in-the-blank types must be added to models/scoring — see question types below.)
+- [x] Faculty question editor lets them pick the question type (drives the control):
+      single, multiple-correct (checkboxes), true/false, fill-in-the-blank (accepted-answers list).
+- [x] Attempt navigation: question palette (answered/unanswered, jump-to) plus a
+      per-quiz attempt layout — SCROLL (single page) or PAGED (one question per page).
 - [x] Right-side **scratchpad / workout space** next to the question: a rough area
       for rough work, supporting both **freehand drawing** (canvas) and **typed** notes.
       Per-question; not graded, not submitted (local-only, persisted to localStorage).
 
-## Classes / Enrollment (design option "C")
-- [ ] Class/section entity.
-- [ ] Faculty own classes; assign quizzes to a class.
-- [ ] Student enrollment; students only see quizzes assigned to their class.
+## Classes / Enrollment
+- [x] Class/section entity (name, section, subject, theme color, join code, owner).
+- [x] Faculty own classes; co-teachers supported; admin has full oversight.
+- [x] Student enrollment by join code; students can leave; faculty/admin remove.
+- [x] Assign quizzes to a class — audience = open-to-all / whole-class / selected
+      students. Students see open-to-all ∪ quizzes assigned to them; access enforced on
+      list, detail, and attempt-start.
+- [x] Home big-cards page showing enrolled/taught classes (+ pending count per class).
+- [x] To-do / pending-assessment list for students + topbar badge (reuses the quiz
+      availability window; no email/push).
+
+See `docs/superpowers/specs/2026-08-11-classrooms-design.md`.
 
 ## AI Enhancements (Mistral)
 - [ ] Auto-difficulty calibration from past attempt data.

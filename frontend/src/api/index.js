@@ -8,3 +8,5 @@ export { aiApi } from "./ai";
 export { attemptsApi } from "./attempts";
 export { dashboardApi } from "./dashboard";
 export { leaderboardApi } from "./leaderboard";
+export { classroomsApi } from "./classrooms";
+export { assignmentsApi } from "./assignments";

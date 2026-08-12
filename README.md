@@ -8,7 +8,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.118-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%2B-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Tests](https://img.shields.io/badge/tests-16%20passing-brightgreen)](#testing)
+[![Tests](https://img.shields.io/badge/tests-37%20passing-brightgreen)](#testing)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 </div>
@@ -34,10 +34,26 @@ The platform is built to be deployed as a real product: relational data model, d
 - **Human-in-the-loop** — AI output is stored as **drafts**; faculty review, edit, and approve before anything reaches students. Nothing unreviewed is ever published.
 
 ### Assessment Engine
+- **Four question types** — single-correct, multiple-correct (all-or-nothing), true/false, and fill-in-the-blank (case-insensitive matching with multiple accepted answers).
+- **Negative marking** — optional per-quiz penalty for wrong answers; total is floored at zero.
+- **Randomization** — optional per-quiz question and option shuffling, frozen per attempt so a refresh or resume keeps the same order.
+- **Availability scheduling** — optional open/close window; attempts are gated server-side.
+- **Two attempt layouts** the faculty picks per quiz — a single scrolling page, or one question per page with previous/next — both with a live question palette showing answered/unanswered status, plus a per-question scratchpad.
 - Backend-authoritative **scoring** (correct/incorrect/unanswered, marks, percentage, pass/fail).
 - Server-validated **timer** with capped time-taken and auto-submit semantics.
 - **Attempt controls**: configurable max attempts, resume-in-progress, spoofed-answer rejection.
-- Detailed **result & review** with per-question explanations.
+- Detailed **result & review** with per-question explanations, selected-vs-correct highlighting per type, and accepted answers for blanks.
+
+### Classrooms & Enrollment
+- Faculty create **classes** (name, section, subject, theme color) and get a unique **join code**; students self-enroll with the code and can leave anytime.
+- **Co-teachers** — an owner can add other faculty to help run a class.
+- **Admin oversight** — admins see every class with its owner and member counts, and can reassign ownership or remove a class.
+- Reusable class cards and a per-class roster; membership and access enforced server-side (students never see a class's join code or roster).
+
+### Quiz Assignment & Home
+- A quiz is **open to all** or **assigned** to one-or-more classes, each targeting the **whole class** or a **selected subset** of students (differentiated assignment by performance).
+- Students see open-to-all quizzes plus those assigned to them; access is enforced on listing, detail, and attempt-start — a non-targeted student cannot open or start an assigned quiz.
+- A **Home** of class cards per role, a student **to-do list** of pending assessments (with due date and attempts left), and a **topbar badge** for the pending count.
 
 ### Insights
 - Admin dashboard (totals, pass/fail, average score) and analytics (attempts/registrations over time, popular quizzes & categories).
@@ -82,10 +98,10 @@ quizzz/
 │  │  ├─ core/         # config, security (JWT/bcrypt), RBAC dependencies
 │  │  ├─ db/           # engine, session, declarative base
 │  │  ├─ models/       # users, categories, quizzes, questions, options,
-│  │  │                #   attempts, answers, ai_generation_jobs
+│  │  │                #   attempts, answers, ai_generation_jobs, classrooms
 │  │  ├─ schemas/      # Pydantic request/response models
-│  │  ├─ routers/      # auth, users, categories, quizzes, questions,
-│  │  │                #   ai, attempts, dashboard, admin, leaderboard
+│  │  ├─ routers/      # auth, users, categories, quizzes, questions, ai,
+│  │  │                #   attempts, dashboard, admin, leaderboard, classrooms
 │  │  ├─ services/     # scoring, ai_service (Mistral), pdf_extract, authz
 │  │  ├─ seed.py       # bootstrap admin + default categories
 │  │  └─ main.py       # app factory, CORS, router registration
@@ -180,11 +196,13 @@ Build for production with `npm run build` (outputs `dist/`). Ensure the backend'
 `FRONTEND_ORIGIN` matches the frontend URL so CORS allows the browser requests.
 
 The frontend covers all three roles — student (browse, timed attempts with a
-Google-Forms-style question form and a local scratchpad, results/review,
-dashboard, leaderboard), faculty (quiz & question authoring, AI generation with
-draft review/approve, dashboard), and admin (user management, categories,
-analytics, attempts). All scoring, the exam timer, and correct answers stay
-server-side; the client only renders backend responses.
+clean question form in either a single-page or one-question-per-page layout, a
+live question palette, and a local scratchpad, plus results/review, dashboard,
+and leaderboard), faculty (quiz & question authoring across all question types,
+per-quiz scoring and scheduling options, AI generation with draft review/approve,
+dashboard), and admin (user management, categories, analytics, attempts). All
+scoring, the exam timer, and correct answers stay server-side; the client only
+renders backend responses.
 
 ## Testing
 
@@ -194,7 +212,7 @@ source .venv/bin/activate
 pytest -q
 ```
 
-The suite runs each test inside a database transaction that is rolled back on teardown, so **tests never pollute your database**. Coverage includes auth/RBAC, ownership isolation, publish guards, attempt scoring, timer/max-attempt enforcement, AI generate/approve (Mistral mocked), dashboards, analytics, leaderboard, and user management.
+The suite runs each test inside a database transaction that is rolled back on teardown, so **tests never pollute your database**. Coverage includes auth/RBAC, ownership isolation, publish guards, per-type scoring (multiple-correct all-or-nothing, true/false, fill-in-the-blank), negative marking, availability gating, frozen randomized layout, attempt scoring, timer/max-attempt enforcement, AI generate/approve (Mistral mocked), dashboards, analytics, leaderboard, and user management.
 
 ## API Reference (summary)
 
@@ -208,6 +226,8 @@ The suite runs each test inside a database transaction that is rolled back on te
 | AI | `POST /api/ai/generate` · `GET /api/ai/jobs/{id}` · `POST /api/ai/jobs/{id}/approve` |
 | Attempts | `POST /api/quizzes/{id}/start` · `POST /api/quizzes/{id}/submit` · `GET /api/attempts` · `GET /api/attempts/{id}` |
 | Dashboards | `GET /api/dashboard/student` · `GET /api/dashboard/faculty` · `GET /api/admin/dashboard` · `GET /api/admin/analytics` · `GET /api/admin/attempts` |
+| Classrooms | `GET/POST /api/classrooms` · `GET/PUT/DELETE /api/classrooms/{id}` · `POST /api/classrooms/join` · `DELETE /api/classrooms/{id}/leave` · teachers/students/owner/code sub-routes · `GET /api/admin/classrooms` |
+| Assignments | `GET/PUT /api/quizzes/{id}/assignments` · `GET /api/assignments/todo` |
 | Leaderboard | `GET /api/leaderboard` |
 
 Full, always-current schema is available at `/docs` (Swagger) and `/openapi.json`.
@@ -248,7 +268,7 @@ Planned hardening (rate limiting, security headers, refresh-token rotation, logi
 
 ## Roadmap
 
-See [`FUTURE_WORK.md`](FUTURE_WORK.md) for the full list, including: additional question types (multiple-correct, true/false, fill-in-the-blank), Google-Forms-style attempt UI with a scratchpad, class/section enrollment, certificates, email notifications, negative marking, quiz scheduling, CSV/Excel import, dark mode, and login IP logging.
+See [`FUTURE_WORK.md`](FUTURE_WORK.md) for the full list. In active development: **email-verified faculty/admin signup** with role-lock. Further ahead: certificates, email notifications, CSV/Excel import, dark mode, and login-IP audit logging.
 
 ## License
 

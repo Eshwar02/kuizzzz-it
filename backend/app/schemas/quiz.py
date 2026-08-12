@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.enums import AttemptLayout, Difficulty, QuizStatus
+from app.models.enums import AttemptLayout, Difficulty, QuizStatus, QuizVisibility
 
 
 class QuizCreate(BaseModel):
@@ -61,6 +61,7 @@ class QuizOut(BaseModel):
     passing_score: int
     max_attempts: int
     status: QuizStatus
+    visibility: QuizVisibility
     thumbnail_url: str | None
     negative_marking_enabled: bool
     negative_marks_per_wrong: float
@@ -77,5 +78,6 @@ class QuizDetail(QuizOut):
     """Quiz plus derived fields shown on the details page."""
 
     question_count: int = 0
+    assignment_count: int = 0
     category_name: str | None = None
     creator_name: str | None = None

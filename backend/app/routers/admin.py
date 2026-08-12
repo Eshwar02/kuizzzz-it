@@ -6,16 +6,25 @@ from app.core.deps import require_role
 from app.db.session import get_db
 from app.models.attempt import Attempt
 from app.models.category import Category
+from app.models.classroom import Classroom
 from app.models.enums import AttemptStatus, QuizStatus, UserRole
 from app.models.question import Question
 from app.models.quiz import Quiz
 from app.models.user import User
+from app.routers.classrooms import _serialize as _serialize_classroom
 from app.schemas.attempt import AttemptListItem, AttemptResult
+from app.schemas.classroom import ClassroomOut
 from app.schemas.dashboard import AdminAnalytics, AdminDashboard, CountPoint
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
 AdminOnly = require_role(UserRole.ADMIN)
+
+
+@router.get("/classrooms", response_model=list[ClassroomOut])
+def list_all_classrooms(db: Session = Depends(get_db), _: User = Depends(AdminOnly)):
+    rows = db.scalars(select(Classroom)).all()
+    return [_serialize_classroom(db, c, with_code=True) for c in rows]
 
 
 @router.get("/dashboard", response_model=AdminDashboard)

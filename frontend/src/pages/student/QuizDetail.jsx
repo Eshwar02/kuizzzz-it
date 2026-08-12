@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { quizzesApi, attemptsApi } from "../../api";
 import { Card, Button, Badge, Stat, Spinner } from "../../components/ui";
-import { fmtDate } from "../../lib/format";
+import { fmtDate, scheduleState } from "../../lib/format";
 
 export default function QuizDetail() {
   const { id } = useParams();
@@ -31,17 +31,23 @@ export default function QuizDetail() {
   if (loading) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
   if (loadError || !quiz) return (
     <div className="max-w-3xl space-y-4">
-      <Link to="/" className="text-sm text-violet-dark">← Back to browse</Link>
+      <Link to="/browse" className="text-sm text-violet-dark">← Back to browse</Link>
       <Card title="Quiz unavailable">This quiz could not be loaded. It may have been unpublished or removed.</Card>
     </div>
   );
   const used = attempts.length;
-  const canAttempt = used < quiz.max_attempts;
+  const sched = scheduleState(quiz);
+  const canAttempt = used < quiz.max_attempts && sched === "OPEN";
 
   return (
     <div className="space-y-4 max-w-3xl">
-      <Link to="/" className="text-sm text-violet-dark">← Back to browse</Link>
-      <Card title={quiz.title} actions={<Badge tone="violet">{quiz.difficulty}</Badge>}>
+      <Link to="/browse" className="text-sm text-violet-dark">← Back to browse</Link>
+      <Card title={quiz.title} actions={
+        <span className="flex items-center gap-1.5">
+          {sched === "UPCOMING" && <Badge tone="amber">Upcoming</Badge>}
+          {sched === "CLOSED" && <Badge tone="red">Closed</Badge>}
+          <Badge tone="violet">{quiz.difficulty}</Badge>
+        </span>}>
         <p className="text-ink/70">{quiz.description || "No description."}</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
           <Stat label="Duration" value={`${quiz.duration_minutes}m`} />
@@ -53,7 +59,9 @@ export default function QuizDetail() {
           <Button onClick={start} disabled={starting || !canAttempt || quiz.question_count === 0}>
             {starting ? "Starting…" : used > 0 ? "Attempt again" : "Start attempt"}
           </Button>
-          {!canAttempt && <p className="text-sm text-red-600 mt-2">You've used all attempts for this quiz.</p>}
+          {sched === "UPCOMING" && <p className="text-sm text-amber-700 mt-2">Opens {fmtDate(quiz.available_from)}.</p>}
+          {sched === "CLOSED" && <p className="text-sm text-red-600 mt-2">This quiz closed {fmtDate(quiz.available_until)}.</p>}
+          {sched === "OPEN" && used >= quiz.max_attempts && <p className="text-sm text-red-600 mt-2">You've used all attempts for this quiz.</p>}
           {quiz.question_count === 0 && <p className="text-sm text-ink/50 mt-2">This quiz has no questions yet.</p>}
         </div>
       </Card>
