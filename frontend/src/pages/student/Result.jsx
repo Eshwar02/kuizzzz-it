@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { attemptsApi } from "../../api";
-import { Card, Stat, Badge, Spinner, Button } from "../../components/ui";
+import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Card, Stat, Badge, Spinner, Button, Gauge, ProgressBar } from "../../components/ui";
 import { fmtDuration } from "../../lib/format";
 
 export default function Result() {
@@ -12,12 +13,26 @@ export default function Result() {
 
   return (
     <div className="space-y-4 max-w-3xl">
-      <Card title={r.quiz_title || "Result"} actions={<Badge tone={r.status === "PASSED" ? "green" : "red"}>{r.status}</Badge>}>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Stat label="Score" value={`${r.score}/${r.total_marks}`} />
-          <Stat label="Percentage" value={`${r.percentage.toFixed(1)}%`} sub={`pass ${r.passing_score}%`} />
-          <Stat label="Correct" value={`${r.correct_answers}/${r.total_questions}`} sub={`${r.incorrect_answers} wrong · ${r.unanswered} blank`} />
-          <Stat label="Time" value={fmtDuration(r.time_taken)} />
+      <Card>
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          <Gauge value={r.percentage} size={128} tone={r.status === "PASSED" ? "#2F855A" : "#C53030"} label="score" />
+          <div className="flex-1 w-full space-y-3">
+            <div className="flex items-center gap-2">
+              {r.status === "PASSED"
+                ? <CheckCircle2 className="text-green-600" size={22} />
+                : <XCircle className="text-red-600" size={22} />}
+              <h2 className="text-xl font-semibold text-ink">{r.quiz_title || "Result"}</h2>
+              <Badge tone={r.status === "PASSED" ? "green" : "red"}>{r.status}</Badge>
+            </div>
+            <p className="text-sm text-ink/60">
+              {r.score}/{r.total_marks} marks · pass mark {r.passing_score}% · {fmtDuration(r.time_taken)}
+            </p>
+            <div className="space-y-2 max-w-md">
+              <ProgressBar label="Correct" value={r.correct_answers} max={r.total_questions} tone="#2F855A" />
+              <ProgressBar label="Incorrect" value={r.incorrect_answers} max={r.total_questions} tone="#C53030" />
+              <ProgressBar label="Unanswered" value={r.unanswered} max={r.total_questions} tone="#B7791F" />
+            </div>
+          </div>
         </div>
       </Card>
 

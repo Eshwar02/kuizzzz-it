@@ -1,7 +1,35 @@
 import { useEffect, useState } from "react";
+import { Medal } from "lucide-react";
 import { leaderboardApi, categoriesApi } from "../../api";
-import { Card, Table, Select, Spinner } from "../../components/ui";
+import { Card, Table, Select, Spinner, Avatar } from "../../components/ui";
 import { fmtPct } from "../../lib/format";
+
+const MEDAL = ["#B7791F", "#718096", "#9C4221"]; // gold, silver, bronze
+
+function Podium({ top }) {
+  if (!top.length) return null;
+  const order = [1, 0, 2].filter((i) => top[i]); // silver, gold, bronze layout
+  return (
+    <div className="flex items-end justify-center gap-4 py-4">
+      {order.map((i) => {
+        const r = top[i];
+        const h = i === 0 ? "h-28" : i === 1 ? "h-20" : "h-16";
+        return (
+          <div key={r.rank} className="flex flex-col items-center">
+            <Avatar name={r.name} size={i === 0 ? 56 : 44} />
+            <p className="text-sm font-medium text-ink mt-1">{r.name}</p>
+            <p className="text-xs text-ink/50">{fmtPct(r.average_score)}</p>
+            <div className={`${h} w-20 mt-2 rounded-t-md grid place-items-start justify-center pt-2`} style={{ backgroundColor: `${MEDAL[i]}22` }}>
+              <span className="inline-flex items-center gap-1 text-sm font-semibold" style={{ color: MEDAL[i] }}>
+                <Medal size={16} /> {r.rank}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function Leaderboard() {
   const [rows, setRows] = useState(null);
@@ -34,7 +62,10 @@ export default function Leaderboard() {
           </Select>
         </div>
         {rows === null ? <div className="grid place-items-center py-8"><Spinner /></div>
-          : <Table columns={columns} rows={rows} empty="No ranked students yet." />}
+          : <>
+              {rows.length > 0 && <Podium top={rows.slice(0, 3)} />}
+              <Table columns={columns} rows={rows} empty="No ranked students yet." />
+            </>}
       </Card>
     </div>
   );

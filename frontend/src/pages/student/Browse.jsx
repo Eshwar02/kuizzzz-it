@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { quizzesApi, categoriesApi } from "../../api";
-import { Card, Input, Select, Spinner, EmptyState } from "../../components/ui";
+import { Card, Input, Select, EmptyState, SkeletonCard } from "../../components/ui";
 import QuizCard from "../../components/quiz/QuizCard";
 
 export default function Browse() {
@@ -35,7 +35,11 @@ export default function Browse() {
           </Select>
         </div>
       </Card>
-      {loading ? <div className="grid place-items-center py-12"><Spinner size={28} /></div>
+      {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+        )
         : quizzes.length === 0 ? <EmptyState title="No quizzes found" message="Try a different search or category." />
         : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

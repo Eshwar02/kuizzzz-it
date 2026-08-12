@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { quizzesApi, attemptsApi } from "../../api";
+import { Clock, ListChecks, Target, Repeat } from "lucide-react";
 import { Card, Button, Badge, Stat, Spinner } from "../../components/ui";
 import { fmtDate, scheduleState } from "../../lib/format";
 
@@ -50,10 +51,10 @@ export default function QuizDetail() {
         </span>}>
         <p className="text-ink/70">{quiz.description || "No description."}</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-          <Stat label="Duration" value={`${quiz.duration_minutes}m`} />
-          <Stat label="Questions" value={quiz.question_count} />
-          <Stat label="Pass mark" value={`${quiz.passing_score}%`} />
-          <Stat label="Attempts" value={`${used}/${quiz.max_attempts}`} />
+          <Stat label="Duration" value={`${quiz.duration_minutes}m`} icon={Clock} />
+          <Stat label="Questions" value={quiz.question_count} icon={ListChecks} tone="#2B6CB0" />
+          <Stat label="Pass mark" value={`${quiz.passing_score}%`} icon={Target} tone="#2F855A" />
+          <Stat label="Attempts" value={`${used}/${quiz.max_attempts}`} icon={Repeat} tone="#B7791F" />
         </div>
         <div className="mt-6">
           <Button onClick={start} disabled={starting || !canAttempt || quiz.question_count === 0}>

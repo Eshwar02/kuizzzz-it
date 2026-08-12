@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { attemptsApi } from "../../api";
-import { Button, Spinner, Modal } from "../../components/ui";
+import { Button, Spinner, Modal, ProgressBar } from "../../components/ui";
 import { useCountdown } from "../../lib/useCountdown";
 import Timer from "../../components/quiz/Timer";
 import Scratchpad from "../../components/quiz/Scratchpad";
@@ -69,9 +69,11 @@ export default function Attempt() {
   return (
     <div className="space-y-4">
       <div className="sticky top-0 z-10 bg-surface/95 backdrop-blur border-b border-ink/10 -mx-6 px-6 py-3 flex items-center justify-between">
-        <div>
+        <div className="min-w-0 flex-1 mr-4">
           <h1 className="font-semibold text-ink">{data.quiz_title}</h1>
-          <p className="text-xs text-ink/50">{answeredCount}/{data.questions.length} answered</p>
+          <div className="mt-1 max-w-xs">
+            <ProgressBar value={answeredCount} max={data.questions.length} label="answered" />
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <Timer seconds={remaining} />
