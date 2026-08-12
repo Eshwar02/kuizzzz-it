@@ -18,7 +18,7 @@ export default function Sidebar() {
   const { user } = useAuth();
   const links = NAV[user?.role] || [];
   return (
-    <aside className="w-56 shrink-0 bg-card border-r border-ink/15 min-h-screen p-3">
+    <aside className="w-56 shrink-0 bg-card border-r border-ink/15 h-screen overflow-y-auto p-3">
       <div className="text-xl font-semibold text-violet-dark px-2 py-3">Kuizzz</div>
       <nav className="space-y-1">
         {links.map(([to, label]) => (
