@@ -91,6 +91,11 @@ def start_attempt(
     if quiz is None or quiz.status != QuizStatus.PUBLISHED:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not available")
 
+    from app.services import assignments as asvc  # local import avoids cycles
+
+    if not asvc.student_can_access(db, user, quiz):
+        raise HTTPException(status_code=403, detail="This quiz is not assigned to you")
+
     now = _now()
     if quiz.available_from and now < _aware(quiz.available_from):
         raise HTTPException(status_code=403, detail="This quiz is not yet available")
