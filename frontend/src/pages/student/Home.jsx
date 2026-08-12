@@ -1,11 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { Compass, Users } from "lucide-react";
 import { classroomsApi, assignmentsApi } from "../../api";
-import { Card, Button, Spinner, EmptyState, Badge } from "../../components/ui";
+import { Card, Button, Spinner, EmptyState, Badge, HeroBand, SectionTitle } from "../../components/ui";
 import ClassCard from "../../components/classroom/ClassCard";
+import { useAuth } from "../../auth/AuthContext";
 import { fmtDate } from "../../lib/format";
 
+const daypart = () => {
+  const h = new Date().getHours();
+  return h < 12 ? "morning" : h < 18 ? "afternoon" : "evening";
+};
+
 export default function Home() {
+  const { user } = useAuth();
   const [classes, setClasses] = useState([]);
   const [todo, setTodo] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,15 +34,23 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-ink">Home</h1>
-        <Link to="/browse"><Button variant="secondary">Browse quizzes</Button></Link>
-      </div>
+      <HeroBand
+        title={`Good ${daypart()}, ${user?.name?.split(" ")[0] || "there"} 👋`}
+        subtitle={new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
+        chips={<>
+          <Badge tone="amber" dot>{todo.length} pending</Badge>
+          <Badge tone="green" dot>{classes.length} {classes.length === 1 ? "class" : "classes"}</Badge>
+        </>}
+        actions={<>
+          <Link to="/browse"><Button variant="secondary"><Compass size={16} /> Browse</Button></Link>
+          <Link to="/classes"><Button variant="secondary"><Users size={16} /> Classes</Button></Link>
+        </>}
+      />
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-ink/60 uppercase tracking-wide">Classes</h2>
+      <section>
+        <SectionTitle>Classes</SectionTitle>
         {classes.length === 0 ? (
-          <EmptyState title="No classes yet" message="Join a class from the Classes page to see it here." />
+          <EmptyState icon={Users} title="No classes yet" message="Join a class from the Classes page to see it here." />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {classes.map((c) => (
@@ -42,7 +58,7 @@ export default function Home() {
                 <div className="space-y-1">
                   {c.owner_name && <div>{c.owner_name}</div>}
                   {pendingByClass[c.name]
-                    ? <Badge tone="amber">{pendingByClass[c.name]} pending</Badge>
+                    ? <Badge tone="amber" dot>{pendingByClass[c.name]} pending</Badge>
                     : <span className="text-xs text-ink/40">No pending work</span>}
                 </div>
               </ClassCard>
@@ -51,8 +67,8 @@ export default function Home() {
         )}
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-ink/60 uppercase tracking-wide">To-do</h2>
+      <section>
+        <SectionTitle>To-do</SectionTitle>
         <Card>
           {todo.length === 0 ? (
             <p className="text-sm text-ink/50">Nothing pending. You're all caught up.</p>

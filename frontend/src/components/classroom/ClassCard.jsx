@@ -1,15 +1,17 @@
 import { Link } from "react-router-dom";
+import { BookOpen } from "lucide-react";
 
 // Reusable class card: colored header band + body slot + footer actions slot.
 export default function ClassCard({ classroom, to, footer, children }) {
   const inner = (
-    <div className="bg-card border border-ink/15 rounded-sm overflow-hidden flex flex-col h-full">
+    <div className="card-soft hover-lift overflow-hidden flex flex-col h-full">
       <div
-        className="h-24 p-4 text-white flex flex-col justify-between"
+        className="relative h-24 p-4 text-white flex flex-col justify-between overflow-hidden"
         style={{ backgroundColor: classroom.theme_color || "#B23A6F" }}
       >
-        <h3 className="font-semibold text-lg leading-tight line-clamp-2">{classroom.name}</h3>
-        {classroom.section && <p className="text-xs opacity-90">{classroom.section}</p>}
+        <BookOpen size={72} className="absolute -right-3 -bottom-3 opacity-15" />
+        <h3 className="font-semibold text-lg leading-tight line-clamp-2 relative">{classroom.name}</h3>
+        {classroom.section && <p className="text-xs opacity-90 relative">{classroom.section}</p>}
       </div>
       <div className="p-4 text-sm text-ink/70 flex-1">{children}</div>
       {footer && (
