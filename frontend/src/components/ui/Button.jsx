@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 const variants = {
   // Professional set: filled primary, outlined secondary, text tertiary.
   primary: "bg-violet text-white border-violet hover:bg-violet-dark hover:border-violet-dark shadow-sm",
-  secondary: "bg-card text-violet-dark border-ink/20 hover:border-violet hover:bg-violet/5",
+  secondary: "bg-card text-violet-dark border-ink/20 hover:border-violet hover:bg-surface",
   tertiary: "bg-transparent text-violet-dark border-transparent hover:underline underline-offset-4 px-1",
   ghost: "bg-transparent text-ink border-transparent hover:bg-ink/5",
   danger: "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-sm",
