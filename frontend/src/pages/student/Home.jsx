@@ -56,7 +56,6 @@ export default function Home() {
             {classes.map((c) => (
               <ClassCard key={c.id} classroom={c} to={`/classes/${c.id}`}>
                 <div className="space-y-1">
-                  {c.owner_name && <div>{c.owner_name}</div>}
                   {pendingByClass[c.name]
                     ? <Badge tone="amber" dot>{pendingByClass[c.name]} pending</Badge>
                     : <span className="text-xs text-ink/40">No pending work</span>}

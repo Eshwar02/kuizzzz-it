@@ -44,7 +44,6 @@ export default function MyClasses() {
           {classes.map((c) => (
             <ClassCard key={c.id} classroom={c} to={`/classes/${c.id}`}>
               <div className="space-y-1">
-                {c.owner_name && <div>{c.owner_name}</div>}
                 {c.subject && <div className="text-xs text-ink/50">{c.subject}</div>}
                 <div className="text-xs text-ink/50">{c.student_count} classmate{c.student_count === 1 ? "" : "s"}</div>
               </div>
