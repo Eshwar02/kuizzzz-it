@@ -17,6 +17,7 @@ export default function QuizForm() {
       difficulty: "INTERMEDIATE", duration_minutes: 20, passing_score: 60, max_attempts: 1,
       attempt_layout: "SCROLL", negative_marking_enabled: false, negative_marks_per_wrong: 0,
       shuffle_questions: false, shuffle_options: false, available_from: "", available_until: "",
+      visibility: "OPEN",
     },
   });
   const negOn = watch("negative_marking_enabled");
@@ -33,6 +34,7 @@ export default function QuizForm() {
       shuffle_questions: q.shuffle_questions, shuffle_options: q.shuffle_options,
       available_from: q.available_from ? q.available_from.slice(0, 16) : "",
       available_until: q.available_until ? q.available_until.slice(0, 16) : "",
+      visibility: q.visibility || "OPEN",
     })).finally(() => setLoading(false));
   }, [id]);
 
@@ -50,6 +52,7 @@ export default function QuizForm() {
       shuffle_options: Boolean(v.shuffle_options),
       available_from: v.available_from ? new Date(v.available_from).toISOString() : null,
       available_until: v.available_until ? new Date(v.available_until).toISOString() : null,
+      visibility: v.visibility,
     };
     const quiz = editing ? await quizzesApi.update(id, payload) : await quizzesApi.create(payload);
     navigate(editing ? "/faculty/quizzes" : `/faculty/quizzes/${quiz.id}/questions`);
@@ -103,6 +106,10 @@ export default function QuizForm() {
               <Input label="Available from" type="datetime-local" {...register("available_from")} />
               <Input label="Available until" type="datetime-local" {...register("available_until")} />
             </div>
+            <Select label="Visibility" {...register("visibility")}>
+              <option value="OPEN">Open to all students</option>
+              <option value="ASSIGNED">Assign to classes (target from My Quizzes → Assign)</option>
+            </Select>
           </div>
 
           <Button type="submit" disabled={isSubmitting}>{editing ? "Save changes" : "Create & add questions"}</Button>
