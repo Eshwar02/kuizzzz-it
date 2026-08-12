@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { classroomsApi, usersApi } from "../../api";
-import { Card, Button, Spinner, Modal, Select, Badge } from "../../components/ui";
+import { Users, GraduationCap } from "lucide-react";
+import { Card, Button, Spinner, Modal, Select, Badge, Stat } from "../../components/ui";
 import { toast } from "../../lib/toast";
 import { useAuth } from "../../auth/AuthContext";
 
@@ -61,6 +62,11 @@ export default function ClassroomDetail() {
         <h1 className="text-2xl font-semibold">{c.name}</h1>
         {c.section && <p className="opacity-90">{c.section}</p>}
         {c.subject && <p className="opacity-75 text-sm">{c.subject}</p>}
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <Stat label="Teachers" value={c.teacher_count} icon={GraduationCap} tone="#2B6CB0" />
+        <Stat label="Students" value={c.student_count} icon={Users} />
       </div>
 
       {isTeacher ? (
