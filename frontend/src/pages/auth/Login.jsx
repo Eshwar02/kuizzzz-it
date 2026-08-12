@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../auth/AuthContext";
+import { GraduationCap } from "lucide-react";
 import { Button, Card, Input } from "../../components/ui";
 
 export default function Login() {
@@ -27,9 +28,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center p-4">
+    <div className="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-surface via-violet/5 to-violet/20">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-semibold text-violet-dark text-center mb-6">Kuizzz</h1>
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <span className="grid place-items-center h-12 w-12 rounded-xl bg-violet text-white shadow-[0_6px_18px_rgba(85,73,218,0.4)]"><GraduationCap size={26} /></span>
+          <h1 className="text-3xl font-semibold text-violet-dark">Kuizzz</h1>
+          <p className="text-sm text-ink/50">Create, assign, and take assessments.</p>
+        </div>
         {postLogin ? (
           <Card title="Signed in">
             <p className="text-sm text-ink/80">You're signed in. Continue to your dashboard.</p>
@@ -42,7 +47,7 @@ export default function Login() {
                 {postLogin.privileged && " As a privileged account, your sign-ins are monitored more closely."}
               </p>
             </div>
-            <Button className="w-full mt-4" onClick={() => navigate(postLogin.to, { replace: true })}>Continue</Button>
+            <Button variant="gradient" arrow size="lg" className="w-full mt-4" onClick={() => navigate(postLogin.to, { replace: true })}>Continue</Button>
           </Card>
         ) : (
           <Card title="Sign in">
@@ -50,7 +55,7 @@ export default function Login() {
               <Input label="Email" type="email" {...register("email", { required: "Email is required" })} error={errors.email?.message} />
               <Input label="Password" type="password" {...register("password", { required: "Password is required" })} error={errors.password?.message} />
               {apiError && <p className="text-sm text-red-600">{apiError}</p>}
-              <Button type="submit" disabled={isSubmitting} className="w-full">{isSubmitting ? "Signing in…" : "Sign in"}</Button>
+              <Button type="submit" variant="gradient" arrow size="lg" disabled={isSubmitting} className="w-full">{isSubmitting ? "Signing in…" : "Sign in"}</Button>
             </form>
             <p className="text-xs text-ink/50 mt-4 border-t border-ink/10 pt-3">
               Your IP address is collected for security purposes and to prevent account misuse.

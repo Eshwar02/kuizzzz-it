@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../auth/AuthContext";
+import { GraduationCap } from "lucide-react";
 import { Button, Card, Input } from "../../components/ui";
 
 export default function Register() {
@@ -30,14 +31,18 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen grid place-items-center p-4">
+    <div className="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-surface via-violet/5 to-violet/20">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl font-semibold text-violet-dark text-center mb-6">Kuizzz</h1>
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <span className="grid place-items-center h-12 w-12 rounded-xl bg-violet text-white shadow-[0_6px_18px_rgba(85,73,218,0.4)]"><GraduationCap size={26} /></span>
+          <h1 className="text-3xl font-semibold text-violet-dark">Kuizzz</h1>
+          <p className="text-sm text-ink/50">Create, assign, and take assessments.</p>
+        </div>
         <Card title="Create account">
           {done ? (
             <div className="space-y-4">
               <p className="text-sm text-ink/80">{done}</p>
-              <Link to="/login"><Button className="w-full">Back to sign in</Button></Link>
+              <Link to="/login"><Button variant="gradient" arrow size="lg" className="w-full">Back to sign in</Button></Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -48,7 +53,7 @@ export default function Register() {
                 <input type="checkbox" {...register("as_faculty")} /> Register as faculty (requires admin approval)
               </label>
               {apiError && <p className="text-sm text-red-600">{apiError}</p>}
-              <Button type="submit" disabled={isSubmitting} className="w-full">
+              <Button type="submit" variant="gradient" arrow size="lg" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? "Creating…" : asFaculty ? "Request faculty account" : "Create account"}
               </Button>
             </form>
