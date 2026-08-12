@@ -5,11 +5,12 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_user, require_role
 from app.db.session import get_db
 from app.models.category import Category
-from app.models.enums import QuizStatus, UserRole
+from app.models.enums import QuizStatus, QuizVisibility, UserRole
 from app.models.question import Question
 from app.models.quiz import Quiz
 from app.models.user import User
 from app.schemas.quiz import PublishRequest, QuizCreate, QuizDetail, QuizOut, QuizUpdate
+from app.services import assignments as asvc
 from app.services.authz import ensure_can_manage_quiz
 
 router = APIRouter(prefix="/api/quizzes", tags=["quizzes"])
@@ -26,8 +27,13 @@ def _to_detail(db: Session, quiz: Quiz) -> QuizDetail:
     question_count = db.scalar(
         select(func.count(Question.id)).where(Question.quiz_id == quiz.id)
     )
+    from app.models.assignment import QuizAssignment
+
     detail = QuizDetail.model_validate(quiz)
     detail.question_count = question_count or 0
+    detail.assignment_count = db.scalar(
+        select(func.count(QuizAssignment.id)).where(QuizAssignment.quiz_id == quiz.id)
+    ) or 0
     detail.category_name = quiz.category.name if quiz.category else None
     detail.creator_name = quiz.creator.name if quiz.creator else None
     return detail
@@ -43,8 +49,12 @@ def list_quizzes(
 ) -> list[QuizDetail]:
     stmt = select(Quiz)
     if user.role == UserRole.STUDENT:
-        # Students only ever see published quizzes.
-        stmt = stmt.where(Quiz.status == QuizStatus.PUBLISHED)
+        # Students see published quizzes that are open-to-all or assigned to them.
+        assigned = asvc.assigned_quiz_ids(db, user)
+        stmt = stmt.where(
+            Quiz.status == QuizStatus.PUBLISHED,
+            (Quiz.visibility == QuizVisibility.OPEN) | (Quiz.id.in_(assigned)),
+        )
     elif user.role == UserRole.FACULTY and mine:
         stmt = stmt.where(Quiz.created_by == user.id)
     # Admin sees everything (optionally filtered below).
@@ -62,8 +72,8 @@ def get_quiz(
     quiz_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ) -> QuizDetail:
     quiz = _get_or_404(db, quiz_id)
-    # Students may only view published quizzes; faculty view own + published.
-    if user.role == UserRole.STUDENT and quiz.status != QuizStatus.PUBLISHED:
+    # Students may only view quizzes open to them or assigned to them.
+    if user.role == UserRole.STUDENT and not asvc.student_can_access(db, user, quiz):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Quiz not found")
     if (
         user.role == UserRole.FACULTY

@@ -24,6 +24,7 @@ def register_routers() -> None:
     from app.routers import (  # noqa: PLC0415
         admin,
         ai,
+        assignments,
         attempts,
         auth,
         categories,
@@ -49,6 +50,9 @@ def register_routers() -> None:
         classrooms,
     ):
         app.include_router(module.router)
+
+    app.include_router(assignments.router)
+    app.include_router(assignments.todo_router)
 
 
 register_routers()
