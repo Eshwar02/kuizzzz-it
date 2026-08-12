@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 import { BookOpen } from "lucide-react";
 import Avatar from "../ui/Avatar";
 
-// Glassmorphic class card: colored banner + overlapping faculty avatar + frosted body.
+// Glassmorphic class card: colored banner + faculty avatar (bottom-right, over the banner).
 export default function ClassCard({ classroom, to, footer, children }) {
   const owner = classroom.owner_name || "Faculty";
   const inner = (
-    <div className="hover-lift rounded-2xl overflow-hidden flex flex-col h-full bg-gradient-to-br from-white/75 to-violet/10 backdrop-blur-md border border-white/50 shadow-[0_8px_30px_rgba(43,39,64,0.12)]">
-      {/* banner (clips the watermark, not the avatar) */}
+    <div className="relative hover-lift rounded-2xl overflow-hidden flex flex-col h-full bg-gradient-to-br from-white/75 to-violet/10 backdrop-blur-md border border-white/50 shadow-[0_8px_30px_rgba(43,39,64,0.12)]">
+      {/* banner (clips only its own watermark) */}
       <div
         className="relative h-24 px-4 pt-4 text-white overflow-hidden"
         style={{ backgroundColor: classroom.theme_color || "#5549DA" }}
@@ -17,15 +17,15 @@ export default function ClassCard({ classroom, to, footer, children }) {
         {classroom.section && <p className="text-xs opacity-90 relative">{classroom.section}</p>}
       </div>
 
-      {/* frosted body; avatar pulled up to overlap the banner */}
-      <div className="p-4 text-sm text-ink/70 flex-1">
-        <div className="flex items-center gap-3 -mt-11 mb-3">
-          <span className="rounded-full ring-4 ring-white shadow-md shrink-0">
-            <Avatar name={owner} size={48} />
-          </span>
-          <p className="font-medium text-ink pt-8 truncate">{owner}</p>
-        </div>
-        {children}
+      {/* avatar: child of the card (not the banner) so it isn't clipped, and above the banner */}
+      <span className="absolute right-4 top-[72px] z-10 rounded-full ring-4 ring-white shadow-md">
+        <Avatar name={owner} size={48} />
+      </span>
+
+      {/* frosted body */}
+      <div className="p-4 pt-5 text-sm text-ink/70 flex-1">
+        <p className="font-medium text-ink">{owner}</p>
+        <div className="mt-1">{children}</div>
       </div>
 
       {footer && (
