@@ -14,7 +14,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
-from app.models.enums import AttemptLayout, Difficulty, QuizStatus
+from app.models.enums import AttemptLayout, Difficulty, QuizStatus, QuizVisibility
 
 
 class Quiz(Base, TimestampMixin):
@@ -51,6 +51,11 @@ class Quiz(Base, TimestampMixin):
     attempt_layout: Mapped[AttemptLayout] = mapped_column(
         SAEnum(AttemptLayout, name="attempt_layout"),
         default=AttemptLayout.SCROLL,
+        nullable=False,
+    )
+    visibility: Mapped[QuizVisibility] = mapped_column(
+        SAEnum(QuizVisibility, name="quiz_visibility"),
+        default=QuizVisibility.OPEN,
         nullable=False,
     )
     updated_at: Mapped[datetime] = mapped_column(

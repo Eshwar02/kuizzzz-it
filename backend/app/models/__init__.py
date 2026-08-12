@@ -1,4 +1,5 @@
 from app.models.ai_job import AIGenerationJob
+from app.models.assignment import QuizAssignment, QuizAssignmentStudent
 from app.models.attempt import Answer, Attempt
 from app.models.category import Category
 from app.models.classroom import Classroom, ClassroomStudent, ClassroomTeacher
@@ -17,5 +18,7 @@ __all__ = [
     "Option",
     "Question",
     "Quiz",
+    "QuizAssignment",
+    "QuizAssignmentStudent",
     "User",
 ]
