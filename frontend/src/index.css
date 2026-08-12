@@ -4,3 +4,12 @@
 
 html, body, #root { height: 100%; }
 body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+
+@layer components {
+  .card-soft { @apply bg-card border border-ink/10 rounded-sm shadow-[0_1px_2px_rgba(43,39,64,0.06),0_4px_12px_rgba(43,39,64,0.05)]; }
+  .hover-lift { @apply transition duration-150 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(43,39,64,0.10)]; }
+}
+
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton { @apply relative overflow-hidden bg-ink/10 rounded-sm; }
+.skeleton::after { content: ""; @apply absolute inset-0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); transform: translateX(-100%); animation: shimmer 1.4s infinite; }
