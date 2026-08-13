@@ -4,4 +4,5 @@ export const attemptsApi = {
   submit: (quizId, payload) => api.post(`/quizzes/${quizId}/submit`, payload).then((r) => r.data), // {attempt_id, answers:[{question_id, selected_option_id}]}
   listMine: () => api.get("/attempts").then((r) => r.data),
   get: (id) => api.get(`/attempts/${id}`).then((r) => r.data),
+  certificate: (id) => api.get(`/attempts/${id}/certificate`, { responseType: "blob" }).then((r) => r.data),
 };

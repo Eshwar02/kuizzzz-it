@@ -1,13 +1,16 @@
 import random
+import re
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.deps import get_current_user, require_role
 from app.db.session import get_db
 from app.models.attempt import Answer, Attempt
+from app.models.category import Category
 from app.models.enums import AttemptStatus, QuestionType, QuizStatus, UserRole
 from app.models.question import Question
 from app.models.quiz import Quiz
@@ -22,6 +25,7 @@ from app.schemas.attempt import (
     SubmitAttemptRequest,
 )
 from app.services import scoring
+from app.services.certificate import render_certificate
 
 router = APIRouter(prefix="/api", tags=["attempts"])
 
@@ -277,6 +281,53 @@ def get_attempt_result(
     quiz = db.get(Quiz, attempt.quiz_id)
     questions = _load_quiz_questions(db, attempt.quiz_id)
     return _build_result(db, attempt, quiz, questions)
+
+
+def _safe_filename(name: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9]+", "-", name).strip("-").lower()
+    return slug or "certificate"
+
+
+@router.get("/attempts/{attempt_id}/certificate")
+def get_attempt_certificate(
+    attempt_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+) -> StreamingResponse:
+    """Download a PDF certificate for a passed attempt."""
+    attempt = db.get(Attempt, attempt_id)
+    if attempt is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Attempt not found")
+    if attempt.user_id != user.id and user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your attempt")
+    if attempt.status != AttemptStatus.PASSED:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Certificate is only available for passed attempts",
+        )
+    quiz = db.get(Quiz, attempt.quiz_id)
+    recipient = db.get(User, attempt.user_id)
+    instructor = db.get(User, quiz.created_by) if quiz else None
+    class_label = None
+    if quiz is not None:
+        if quiz.class_level:
+            class_label = quiz.class_level
+        elif quiz.category_id is not None:
+            category = db.get(Category, quiz.category_id)
+            class_label = category.name if category else None
+
+    pdf = render_certificate(
+        recipient_name=recipient.name if recipient else "Student",
+        quiz_title=quiz.title if quiz else "Quiz",
+        class_label=class_label,
+        percentage=attempt.percentage,
+        instructor_name=instructor.name if instructor else "Course Instructor",
+        issued_on=(attempt.completed_at.date() if attempt.completed_at else None),
+    )
+    filename = f"certificate-{_safe_filename(recipient.name if recipient else 'student')}.pdf"
+    return StreamingResponse(
+        iter([pdf]),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 def _build_result(

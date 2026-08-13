@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { attemptsApi } from "../../api";
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
-import { Card, Stat, Badge, Spinner, Button, Gauge, ProgressBar } from "../../components/ui";
+import { CheckCircle2, XCircle, Award } from "lucide-react";
+import { Card, Badge, Spinner, Button, Gauge, ProgressBar } from "../../components/ui";
 import { fmtDuration } from "../../lib/format";
 
 export default function Result() {
   const { attemptId } = useParams();
   const [r, setR] = useState(null);
+  const [downloading, setDownloading] = useState(false);
   useEffect(() => { attemptsApi.get(attemptId).then(setR); }, [attemptId]);
+
+  const downloadCertificate = async () => {
+    setDownloading(true);
+    try {
+      const blob = await attemptsApi.certificate(attemptId);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = `certificate-${attemptId}.pdf`; a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   if (!r) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
 
   return (
@@ -82,9 +97,15 @@ export default function Result() {
         </ol>
       </Card>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Link to="/my-attempts"><Button variant="secondary">My attempts</Button></Link>
         <Link to="/browse"><Button>Browse more</Button></Link>
+        {r.status === "PASSED" && (
+          <Button onClick={downloadCertificate} disabled={downloading} className="ml-auto">
+            <Award size={16} className="mr-1.5 inline" />
+            {downloading ? "Preparing…" : "Download certificate"}
+          </Button>
+        )}
       </div>
     </div>
   );
