@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { GraduationCap } from "lucide-react";
+import logo from "../../assets/logo.svg";
 import { authApi } from "../../api/auth";
 import { toast } from "../../lib/toast";
 import { Button, Card, Input } from "../../components/ui";
@@ -30,7 +30,7 @@ export default function ResetPassword() {
     <div className="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-surface via-violet/5 to-violet/20">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center gap-2 mb-6">
-          <span className="grid place-items-center h-12 w-12 rounded-xl bg-violet text-white shadow-[0_6px_18px_rgba(85,73,218,0.4)]"><GraduationCap size={26} /></span>
+          <img src={logo} alt="Kuizzz logo" className="h-12 w-12 rounded-xl shadow-[0_6px_18px_rgba(168,30,55,0.35)]" />
           <h1 className="text-3xl font-semibold text-violet-dark">Kuizzz</h1>
           <p className="text-sm text-ink/50">Set a new password.</p>
         </div>

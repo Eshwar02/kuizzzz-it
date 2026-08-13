@@ -7,7 +7,10 @@ export default {
         surface: "#F7F5F2",
         card: "#FFFFFF",
         ink: "#2B2740",
-        violet: { DEFAULT: "#5549DA", light: "#8B82EA", dark: "#3F34B0" },
+        // Brand "merun"/maroon palette, matched to the logo (crimson-on-maroon).
+        // `violet` kept as an alias so existing utility classes recolour in place.
+        brand: { DEFAULT: "#A81E37", light: "#D9647A", dark: "#7C1226" },
+        violet: { DEFAULT: "#A81E37", light: "#D9647A", dark: "#7C1226" },
       },
       borderRadius: { DEFAULT: "2px", sm: "2px", md: "3px" },
     },

@@ -4,12 +4,12 @@ import { Badge, Button } from "../ui";
 import { scheduleState } from "../../lib/format";
 
 const diffTone = { EASY: "green", INTERMEDIATE: "violet", HARD: "red" };
-const diffAccent = { EASY: "#2F855A", INTERMEDIATE: "#5549DA", HARD: "#C53030" };
+const diffAccent = { EASY: "#2F855A", INTERMEDIATE: "#A81E37", HARD: "#C53030" };
 
 export default function QuizCard({ quiz }) {
   const sched = scheduleState(quiz);
   return (
-    <div className="card-soft hover-lift border-l-[3px] p-4 flex flex-col" style={{ borderLeftColor: diffAccent[quiz.difficulty] || "#5549DA" }}>
+    <div className="card-soft hover-lift border-l-[3px] p-4 flex flex-col" style={{ borderLeftColor: diffAccent[quiz.difficulty] || "#A81E37" }}>
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold text-ink">{quiz.title}</h3>
         <div className="flex items-center gap-1.5 shrink-0">

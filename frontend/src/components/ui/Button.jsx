@@ -8,7 +8,7 @@ const variants = {
   ghost: "bg-transparent text-ink border-transparent hover:bg-ink/5",
   danger: "bg-red-600 text-white border-red-600 hover:bg-red-700 shadow-sm",
   // Gradient CTA (sign in / sign up), optional trailing arrow.
-  gradient: "text-white border-transparent bg-gradient-to-r from-violet-light via-violet to-violet-dark hover:brightness-105 shadow-[0_6px_18px_rgba(139,123,184,0.45)]",
+  gradient: "text-white border-transparent bg-gradient-to-r from-violet-light via-violet to-violet-dark hover:brightness-105 shadow-[0_6px_18px_rgba(168,30,55,0.40)]",
 };
 const sizes = { sm: "px-3 py-1.5 text-sm", md: "px-4 py-2 text-sm", lg: "px-6 py-3 text-base" };
 

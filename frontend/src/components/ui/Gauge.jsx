@@ -1,4 +1,4 @@
-export default function Gauge({ value = 0, size = 96, label, tone = "#5549DA" }) {
+export default function Gauge({ value = 0, size = 96, label, tone = "#A81E37" }) {
   const v = Math.max(0, Math.min(100, value));
   const stroke = 8, r = (size - stroke) / 2, c = 2 * Math.PI * r;
   return (

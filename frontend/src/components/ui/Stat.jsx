@@ -1,6 +1,6 @@
 import Gauge from "./Gauge";
 
-export default function Stat({ label, value, sub, icon: Icon, tone = "#5549DA", ring }) {
+export default function Stat({ label, value, sub, icon: Icon, tone = "#A81E37", ring }) {
   return (
     <div className="card-soft p-4 flex items-center gap-3">
       {ring != null ? (

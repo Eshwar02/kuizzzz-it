@@ -1,9 +1,10 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import {
   GraduationCap, Home, Compass, Users, ClipboardList, Trophy, LayoutDashboard,
-  FileText, Sparkles, Tags, BarChart3,
+  FileText, Sparkles, Tags, BarChart3, ChevronDown,
 } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
+import logo from "../../assets/logo.svg";
 
 const NAV = {
   STUDENT: [
@@ -23,14 +24,72 @@ const NAV = {
   ],
 };
 
+// Role-aware targets for the logo hover menu: home + Classrooms / Quiz dashboard / Analytics.
+const BRAND = {
+  STUDENT: {
+    home: "/",
+    menu: [
+      ["/classes", "Classrooms", Users],
+      ["/dashboard", "Quiz dashboard", LayoutDashboard],
+      ["/leaderboard", "Analytics", BarChart3],
+    ],
+  },
+  FACULTY: {
+    home: "/faculty",
+    menu: [
+      ["/faculty/classes", "Classrooms", Users],
+      ["/faculty/quizzes", "Quiz dashboard", LayoutDashboard],
+      ["/faculty/dashboard", "Analytics", BarChart3],
+    ],
+  },
+  ADMIN: {
+    home: "/admin",
+    menu: [
+      ["/admin/classes", "Classrooms", Users],
+      ["/admin", "Quiz dashboard", LayoutDashboard],
+      ["/admin/analytics", "Analytics", BarChart3],
+    ],
+  },
+};
+
 export default function Sidebar() {
   const { user } = useAuth();
   const links = NAV[user?.role] || [];
+  const brand = BRAND[user?.role] || BRAND.STUDENT;
   return (
     <aside className="w-56 shrink-0 bg-card border-r border-ink/15 h-screen overflow-y-auto p-3">
-      <div className="flex items-center gap-2 px-2 py-3 mb-1">
-        <span className="grid place-items-center h-8 w-8 rounded-md bg-violet text-white"><GraduationCap size={18} /></span>
-        <span className="text-xl font-semibold text-violet-dark">Kuizzz</span>
+      {/* Brand: click logo → home; hover → quick-nav dropdown. */}
+      <div className="relative group mb-1">
+        <Link
+          to={brand.home}
+          title="Go to home"
+          className="flex items-center gap-2 px-2 py-3 rounded-md hover:bg-violet/5 transition"
+        >
+          <img src={logo} alt="Kuizzz" className="h-9 w-9 rounded-md shrink-0" />
+          <span className="text-xl font-semibold text-violet-dark truncate">Kuizzz</span>
+          <ChevronDown size={16} className="ml-auto text-ink/40 group-hover:text-violet transition" />
+        </Link>
+        {/* pt-1 keeps the hover bridge alive between the logo and the menu */}
+        <div className="absolute left-0 right-0 top-full z-40 pt-1 hidden group-hover:block">
+          <div className="rounded-md border border-ink/15 bg-card shadow-lg overflow-hidden">
+            {brand.menu.map(([to, label, Icon]) => (
+              <NavLink
+                key={label}
+                to={to}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-2.5 text-sm ${
+                    isActive
+                      ? "bg-violet/10 text-violet-dark"
+                      : "text-ink/80 hover:bg-violet/10 hover:text-violet-dark"
+                  }`
+                }
+              >
+                <Icon size={16} />
+                {label}
+              </NavLink>
+            ))}
+          </div>
+        </div>
       </div>
       <nav className="space-y-1">
         {links.map(([to, label, Icon]) => (

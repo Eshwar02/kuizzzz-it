@@ -1,4 +1,4 @@
-const tones = ["#5549DA", "#2B6CB0", "#2F855A", "#B7791F", "#B23A6F", "#6B46C1"];
+const tones = ["#A81E37", "#2B6CB0", "#2F855A", "#B7791F", "#B23A6F", "#6B46C1"];
 
 export default function Avatar({ name = "?", size = 32 }) {
   const initials = name.split(" ").map((w) => w[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
