@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, require_role
 from app.db.session import get_db
+from app.models.attempt import Attempt
 from app.models.category import Category
-from app.models.enums import QuizStatus, QuizVisibility, UserRole
+from app.models.enums import Difficulty, QuizStatus, QuizVisibility, UserRole
 from app.models.question import Question
 from app.models.quiz import Quiz
 from app.models.user import User
@@ -36,6 +37,9 @@ def _to_detail(db: Session, quiz: Quiz) -> QuizDetail:
     ) or 0
     detail.category_name = quiz.category.name if quiz.category else None
     detail.creator_name = quiz.creator.name if quiz.creator else None
+    detail.attempt_count = db.scalar(
+        select(func.count(Attempt.id)).where(Attempt.quiz_id == quiz.id)
+    ) or 0
     return detail
 
 
@@ -45,6 +49,9 @@ def list_quizzes(
     user: User = Depends(get_current_user),
     category_id: int | None = Query(default=None),
     search: str | None = Query(default=None),
+    difficulty: Difficulty | None = Query(default=None),
+    max_duration: int | None = Query(default=None, ge=1, le=600),
+    sort: str = Query(default="recent", pattern="^(recent|popular|duration)$"),
     mine: bool = Query(default=False),
 ) -> list[QuizDetail]:
     stmt = select(Quiz)
@@ -62,8 +69,26 @@ def list_quizzes(
     if category_id is not None:
         stmt = stmt.where(Quiz.category_id == category_id)
     if search:
-        stmt = stmt.where(Quiz.title.ilike(f"%{search}%"))
-    stmt = stmt.order_by(Quiz.created_at.desc())
+        # Search by quiz title or category name.
+        stmt = stmt.outerjoin(Quiz.category).where(
+            Quiz.title.ilike(f"%{search}%") | Category.name.ilike(f"%{search}%")
+        )
+    if difficulty is not None:
+        stmt = stmt.where(Quiz.difficulty == difficulty)
+    if max_duration is not None:
+        stmt = stmt.where(Quiz.duration_minutes <= max_duration)
+
+    if sort == "popular":
+        attempts = (
+            select(func.count(Attempt.id))
+            .where(Attempt.quiz_id == Quiz.id)
+            .scalar_subquery()
+        )
+        stmt = stmt.order_by(attempts.desc(), Quiz.created_at.desc())
+    elif sort == "duration":
+        stmt = stmt.order_by(Quiz.duration_minutes.asc(), Quiz.created_at.desc())
+    else:  # recent (default)
+        stmt = stmt.order_by(Quiz.created_at.desc())
     return [_to_detail(db, q) for q in db.scalars(stmt).all()]
 
 

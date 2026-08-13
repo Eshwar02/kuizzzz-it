@@ -79,5 +79,6 @@ class QuizDetail(QuizOut):
 
     question_count: int = 0
     assignment_count: int = 0
+    attempt_count: int = 0
     category_name: str | None = None
     creator_name: str | None = None

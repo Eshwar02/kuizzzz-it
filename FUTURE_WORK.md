@@ -75,6 +75,11 @@ See `docs/superpowers/specs/2026-08-11-classrooms-design.md`.
       Emphasized for faculty/admin logins. (Backend returns `client_ip` on login.)
 - [ ] (Later) alert/lock on logins from unexpected IPs for privileged accounts.
 
+## Quiz Discovery (PDF §16)
+- [x] Student browse: search by quiz **title or category name**; filters for
+      **category**, **difficulty**, **max duration**; sort by **recently added**,
+      **most popular** (attempt count), or **shortest first**. Cards show "N taken".
+
 ## UX / Platform
 - [ ] Dark mode (light/dark theme toggle).
 - [ ] Full responsive pass for tablet/mobile (MVP targets desktop/laptop).

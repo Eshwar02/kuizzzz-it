@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ListChecks, Clock, Target } from "lucide-react";
+import { ListChecks, Clock, Target, Users } from "lucide-react";
 import { Badge, Button } from "../ui";
 import { scheduleState } from "../../lib/format";
 
@@ -25,6 +25,9 @@ export default function QuizCard({ quiz }) {
           <span className="inline-flex items-center gap-1"><ListChecks size={14} /> {quiz.question_count} Qs</span>
           <span className="inline-flex items-center gap-1"><Clock size={14} /> {quiz.duration_minutes} min</span>
           <span className="inline-flex items-center gap-1"><Target size={14} /> pass {quiz.passing_score}%</span>
+          {quiz.attempt_count > 0 && (
+            <span className="inline-flex items-center gap-1"><Users size={14} /> {quiz.attempt_count} taken</span>
+          )}
         </div>
       </div>
       <Link to={`/quizzes/${quiz.id}`} className="mt-4"><Button className="w-full">View</Button></Link>
