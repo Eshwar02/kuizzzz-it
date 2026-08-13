@@ -31,7 +31,7 @@ export default function Login() {
     <div className="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-surface via-violet/5 to-violet/20">
       <div className="w-full max-w-md">
         <div className="flex flex-col items-center gap-2 mb-6">
-          <img src={logo} alt="Kuizzz logo" className="h-12 w-12 rounded-xl shadow-[0_6px_18px_rgba(168,30,55,0.35)]" />
+          <img src={logo} alt="Kuizzz logo" className="h-12 w-12 rounded-xl shadow-[0_6px_18px_rgba(13,148,136,0.33)]" />
           <h1 className="text-3xl font-semibold text-violet-dark">Kuizzz</h1>
           <p className="text-sm text-ink/50">Create, assign, and take assessments.</p>
         </div>

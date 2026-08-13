@@ -3,13 +3,14 @@ import { ListChecks, Clock, Target, Users } from "lucide-react";
 import { Badge, Button } from "../ui";
 import { scheduleState } from "../../lib/format";
 
-const diffTone = { EASY: "green", INTERMEDIATE: "violet", HARD: "red" };
-const diffAccent = { EASY: "#2F855A", INTERMEDIATE: "#A81E37", HARD: "#C53030" };
+// Logo-aligned difficulty scale: green → blue → yellow.
+const diffTone = { EASY: "green", INTERMEDIATE: "violet", HARD: "amber" };
+const diffAccent = { EASY: "#22C55E", INTERMEDIATE: "#0EA5E9", HARD: "#F59E0B" };
 
 export default function QuizCard({ quiz }) {
   const sched = scheduleState(quiz);
   return (
-    <div className="card-soft hover-lift border-l-[3px] p-4 flex flex-col" style={{ borderLeftColor: diffAccent[quiz.difficulty] || "#A81E37" }}>
+    <div className="card-soft hover-lift border-l-[3px] p-4 flex flex-col" style={{ borderLeftColor: diffAccent[quiz.difficulty] || "#0D9488" }}>
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold text-ink">{quiz.title}</h3>
         <div className="flex items-center gap-1.5 shrink-0">

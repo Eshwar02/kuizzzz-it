@@ -2,9 +2,9 @@ export const colors = {
   surface: "#F7F5F2",
   card: "#FFFFFF",
   ink: "#2B2740",
-  violet: "#A81E37",
-  violetLight: "#D9647A",
-  violetDark: "#7C1226",
+  violet: "#0D9488",
+  violetLight: "#5EEAD4",
+  violetDark: "#0F766E",
 };
-// Recharts palette (used in admin analytics) — maroon/merun family.
-export const chartColors = ["#A81E37", "#D9647A", "#7C1226", "#E89AA6", "#5A0E1B"];
+// Recharts palette (used in admin analytics) — green / blue / yellow mixture.
+export const chartColors = ["#0D9488", "#0EA5E9", "#F59E0B", "#22C55E", "#3B82F6"];

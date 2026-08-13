@@ -10,7 +10,7 @@ export default function ClassCard({ classroom, to, footer, children }) {
       {/* banner (clips only its own watermark) */}
       <div
         className="relative h-24 px-4 pt-4 text-white overflow-hidden"
-        style={{ backgroundColor: classroom.theme_color || "#A81E37" }}
+        style={{ backgroundColor: classroom.theme_color || "#0D9488" }}
       >
         <BookOpen size={80} className="absolute -right-3 -bottom-4 opacity-15" />
         <h3 className="font-semibold text-lg leading-tight line-clamp-2 relative drop-shadow-sm">{classroom.name}</h3>

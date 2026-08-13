@@ -1,4 +1,4 @@
-export default function ProgressBar({ value = 0, max = 100, tone = "#A81E37", label }) {
+export default function ProgressBar({ value = 0, max = 100, tone = "#0D9488", label }) {
   const pct = max ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
   return (
     <div className="space-y-1">
