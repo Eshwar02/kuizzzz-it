@@ -79,3 +79,13 @@ class QuestionOut(QuestionBase):
     source: QuestionSource
     accepted_answers: list[str] | None = None
     options: list[OptionOut]
+
+
+class ImportRowError(BaseModel):
+    row: int
+    message: str
+
+
+class QuestionImportResult(BaseModel):
+    created: int
+    errors: list[ImportRowError] = []

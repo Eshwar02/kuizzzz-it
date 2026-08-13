@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import PlainTextResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -8,8 +9,12 @@ from app.models.enums import QuestionSource, UserRole
 from app.models.question import Option, Question
 from app.models.quiz import Quiz
 from app.models.user import User
-from app.schemas.question import QuestionCreate, QuestionOut, QuestionUpdate
+from app.schemas.question import QuestionCreate, QuestionImportResult, QuestionOut, QuestionUpdate
 from app.services.authz import ensure_can_manage_quiz
+from app.services.question_import import TEMPLATE_CSV, parse_csv
+
+# 2 MB is plenty for a text CSV and guards against accidental huge uploads.
+MAX_IMPORT_BYTES = 2 * 1024 * 1024
 
 router = APIRouter(prefix="/api", tags=["questions"])
 
@@ -56,7 +61,15 @@ def create_question(
 ) -> Question:
     quiz = _get_quiz_or_404(db, quiz_id)
     ensure_can_manage_quiz(user, quiz)
-    question = Question(
+    question = _persist_question(db, quiz_id, payload)
+    db.add(question)
+    db.commit()
+    db.refresh(question)
+    return question
+
+
+def _persist_question(db: Session, quiz_id: int, payload: QuestionCreate) -> Question:
+    return Question(
         quiz_id=quiz_id,
         question_text=payload.question_text,
         marks=payload.marks,
@@ -70,10 +83,39 @@ def create_question(
             for o in (payload.options or [])
         ],
     )
-    db.add(question)
+
+
+@router.get("/questions/import-template", response_class=PlainTextResponse)
+def import_template(_: User = Depends(FacultyOrAdmin)) -> PlainTextResponse:
+    """Downloadable CSV template documenting the import format."""
+    return PlainTextResponse(
+        TEMPLATE_CSV,
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=questions-template.csv"},
+    )
+
+
+@router.post("/quizzes/{quiz_id}/questions/import", response_model=QuestionImportResult)
+async def import_questions(
+    quiz_id: int,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: User = Depends(FacultyOrAdmin),
+) -> QuestionImportResult:
+    quiz = _get_quiz_or_404(db, quiz_id)
+    ensure_can_manage_quiz(user, quiz)
+    content = await file.read()
+    if len(content) > MAX_IMPORT_BYTES:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="CSV file too large (max 2 MB)",
+        )
+    questions, errors = parse_csv(content)
+    # Import valid rows even if some rows failed; report the failures back.
+    for payload in questions:
+        db.add(_persist_question(db, quiz_id, payload))
     db.commit()
-    db.refresh(question)
-    return question
+    return QuestionImportResult(created=len(questions), errors=errors)
 
 
 @router.put("/questions/{question_id}", response_model=QuestionOut)
