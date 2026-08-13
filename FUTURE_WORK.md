@@ -4,7 +4,9 @@ Items intentionally deferred from the Core MVP. Grouped by area. See
 `docs/superpowers/specs/2026-08-10-quiz-platform-design.md` for the approved MVP scope.
 
 ## Auth & Accounts
-- [ ] Forgot password / reset password via email (token flow).
+- [x] Forgot password / reset password (single-use, 1-hour, hashed token flow).
+      - [ ] *Deferred:* deliver the token by email instead of returning it in the
+        `forgot-password` response (needs the mailer below).
 - [ ] Email verification on registration.
 - [ ] Faculty self-registration approval queue UI (MVP: admin creates/approves directly).
 
@@ -57,8 +59,10 @@ See `docs/superpowers/specs/2026-08-11-classrooms-design.md`.
 
 ## Notifications & Documents
 - [ ] Email notifications (quiz completion, results, certificate).
-- [ ] Certificate generation on passing a quiz (PDF).
-- [ ] CSV/Excel question import.
+- [x] Certificate generation on passing a quiz (PDF; reportlab template,
+      per-recipient name/class/score, owner/admin-only download).
+- [x] CSV question import (documented template + per-row error reporting).
+      - [ ] Still deferred: Excel (.xlsx) import.
 
 ## Security — Login IP Logging (planned during frontend step)
 - [x] **Backend:** on login, capture the client IP (`request.client.host`, honoring
