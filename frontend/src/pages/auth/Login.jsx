@@ -57,6 +57,9 @@ export default function Login() {
               {apiError && <p className="text-sm text-red-600">{apiError}</p>}
               <Button type="submit" variant="gradient" arrow size="lg" disabled={isSubmitting} className="w-full">{isSubmitting ? "Signing in…" : "Sign in"}</Button>
             </form>
+            <p className="text-sm text-right mt-3">
+              <Link to="/forgot-password" className="text-violet-dark font-medium">Forgot password?</Link>
+            </p>
             <p className="text-xs text-ink/50 mt-4 border-t border-ink/10 pt-3">
               Your IP address is collected for security purposes and to prevent account misuse.
             </p>

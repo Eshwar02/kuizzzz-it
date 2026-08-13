@@ -4,6 +4,8 @@ import RoleRoute from "./auth/RoleRoute";
 import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 import StudentHome from "./pages/student/Home";
@@ -37,6 +39,8 @@ import ClassroomDetail from "./pages/classroom/ClassroomDetail";
 export const router = createBrowserRouter([
   { path: "/login", element: <Login /> },
   { path: "/register", element: <Register /> },
+  { path: "/forgot-password", element: <ForgotPassword /> },
+  { path: "/reset-password", element: <ResetPassword /> },
   {
     element: <ProtectedRoute />,
     children: [
