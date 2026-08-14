@@ -47,7 +47,7 @@ export default function Login() {
                 {postLogin.privileged && " As a privileged account, your sign-ins are monitored more closely."}
               </p>
             </div>
-            <Button variant="gradient" arrow size="lg" className="w-full mt-4" onClick={() => navigate(postLogin.to, { replace: true })}>Continue</Button>
+            <Button variant="gradient" arrow size="lg" className="w-full mt-4 btn-offset" onClick={() => navigate(postLogin.to, { replace: true })}>Continue</Button>
           </Card>
         ) : (
           <Card title="Sign in">
@@ -55,7 +55,7 @@ export default function Login() {
               <Input label="Email" type="email" {...register("email", { required: "Email is required" })} error={errors.email?.message} />
               <Input label="Password" type="password" {...register("password", { required: "Password is required" })} error={errors.password?.message} />
               {apiError && <p className="text-sm text-red-600">{apiError}</p>}
-              <Button type="submit" variant="gradient" arrow size="lg" disabled={isSubmitting} className="w-full">{isSubmitting ? "Signing in…" : "Sign in"}</Button>
+              <Button type="submit" variant="gradient" arrow size="lg" disabled={isSubmitting} className="w-full btn-offset">{isSubmitting ? "Signing in…" : "Sign in"}</Button>
             </form>
             <p className="text-sm text-right mt-3">
               <Link to="/forgot-password" className="text-violet-dark font-medium">Forgot password?</Link>

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { quizzesApi, categoriesApi } from "../../api";
-import { Card, Input, Select, Textarea, Button, Spinner } from "../../components/ui";
+import { Card, Input, Select, Textarea, Button, Spinner, Modal } from "../../components/ui";
 
 const DIFFS = ["EASY", "INTERMEDIATE", "HARD"];
 
@@ -21,6 +21,10 @@ export default function QuizForm() {
     },
   });
   const negOn = watch("negative_marking_enabled");
+  // Creating a new quiz opens a confirm modal (publish / cancel) before it's
+  // actually created; editing saves directly. `pending` holds the built payload.
+  const [pending, setPending] = useState(null);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => { categoriesApi.list().then(setCategories).catch(() => {}); }, []);
   useEffect(() => {
@@ -54,8 +58,23 @@ export default function QuizForm() {
       available_until: v.available_until ? new Date(v.available_until).toISOString() : null,
       visibility: v.visibility,
     };
-    const quiz = editing ? await quizzesApi.update(id, payload) : await quizzesApi.create(payload);
-    navigate(editing ? "/faculty/quizzes" : `/faculty/quizzes/${quiz.id}/questions`);
+    if (editing) {
+      await quizzesApi.update(id, payload);
+      navigate("/faculty/quizzes");
+    } else {
+      // Hold the payload and let the user confirm publishing in the modal.
+      setPending(payload);
+    }
+  };
+
+  const publish = async () => {
+    setCreating(true);
+    try {
+      const quiz = await quizzesApi.create(pending);
+      navigate(`/faculty/quizzes/${quiz.id}/questions`);
+    } finally {
+      setCreating(false);
+    }
   };
 
   if (loading) return <div className="grid place-items-center py-12"><Spinner size={28} /></div>;
@@ -115,6 +134,27 @@ export default function QuizForm() {
           <Button type="submit" disabled={isSubmitting}>{editing ? "Save changes" : "Create & add questions"}</Button>
         </form>
       </Card>
+
+      <Modal
+        open={Boolean(pending)}
+        title="Publish this quiz?"
+        onClose={() => !creating && setPending(null)}
+      >
+        <p className="text-sm text-ink/80">
+          <span className="font-semibold text-ink">{pending?.title}</span> will be created and you'll
+          move on to adding its questions. You can keep editing the details instead.
+        </p>
+        <div className="mt-5 grid grid-cols-2 gap-3">
+          <button type="button" className="btn-slide btn-slide--grey" disabled={creating} onClick={() => setPending(null)}>
+            <span className="btn-slide__base">Cancel</span>
+            <span className="btn-slide__reveal">Keep editing</span>
+          </button>
+          <button type="button" className="btn-slide btn-slide--teal" disabled={creating} onClick={publish}>
+            <span className="btn-slide__base">{creating ? "Publishing…" : "Publish quiz"}</span>
+            <span className="btn-slide__reveal">Confirm →</span>
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

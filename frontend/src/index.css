@@ -10,6 +10,78 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
   .hover-lift { @apply transition duration-150 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(43,39,64,0.10)]; }
 }
 
+/*
+  Signature framed control: a yellow inner ring hugging the element and a soft
+  grey outer ring that melts into the surrounding surface — the "grey outwards,
+  yellow inwards" look. Curved corners come from rounded-xl on the element, and
+  the rings inherit that radius. Prominent buttons pop slightly on hover.
+*/
+.btn-framed {
+  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 6px #ECEAE6;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.btn-framed:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.02);
+  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 7px #E0DDD7, 0 6px 14px rgba(43, 39, 64, 0.12);
+}
+.btn-framed:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+
+/*
+  Offset animation (adapted from the CodePen "offset" effect) for the login CTAs.
+  Keeps the teal gradient fill: at rest a teal drop-shadow sits offset to the
+  bottom-right; on hover it retracts while a translucent highlight sweeps in
+  diagonally from the top-left. Frame rings are folded into the same box-shadow
+  stack (same shadow count at rest/hover so the transition stays smooth).
+*/
+.btn-offset {
+  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 6px #ECEAE6, 0.3em 0.3em 0 0 rgba(15, 118, 110, 0.30);
+  transition: box-shadow 0.3s ease, transform 0.2s ease;
+}
+.btn-offset:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 7px #E0DDD7, inset 6em 3.5em 0 0 rgba(255, 255, 255, 0.20);
+}
+.btn-offset:active:not(:disabled) { transform: translateY(0); }
+
+/*
+  Slide-reveal confirm buttons (adapted from the CodePen sliding-panel button)
+  for the quiz-creation confirm modal. The base label slides out to the right
+  while the confirm label slides in from the left. Carries the framed rings too.
+*/
+.btn-slide {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 6px #ECEAE6;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.btn-slide:hover { transform: translateY(-1px); }
+.btn-slide:active { transform: translateY(0) scale(0.99); }
+.btn-slide__base,
+.btn-slide__reveal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+.btn-slide__reveal {
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+}
+.btn-slide:hover .btn-slide__base { transform: translateX(100%); }
+.btn-slide:hover .btn-slide__reveal { transform: translateX(0); }
+.btn-slide--teal .btn-slide__base { background: #0D9488; color: #fff; }
+.btn-slide--teal .btn-slide__reveal { background: #0F766E; color: #fff; }
+.btn-slide--grey .btn-slide__base { background: #ECEAE6; color: #2B2740; }
+.btn-slide--grey .btn-slide__reveal { background: #DC2626; color: #fff; }
+
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 .skeleton { @apply relative overflow-hidden bg-ink/10 rounded-sm; }
 .skeleton::after { content: ""; @apply absolute inset-0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent); transform: translateX(-100%); animation: shimmer 1.4s infinite; }

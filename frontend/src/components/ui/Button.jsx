@@ -11,11 +11,18 @@ const variants = {
   gradient: "text-white border-transparent bg-gradient-to-r from-emerald-400 via-teal-500 to-sky-500 hover:brightness-105 shadow-[0_6px_18px_rgba(13,148,136,0.38)]",
 };
 const sizes = { sm: "px-3 py-1.5 text-sm", md: "px-4 py-2 text-sm", lg: "px-6 py-3 text-base" };
+// Prominent variants get the "grey outwards, yellow inwards" double frame with
+// curved corners. Tertiary/ghost/secondary stay flat to keep dense UIs calm.
+const FRAMED = new Set(["primary", "gradient", "danger"]);
 
 export default function Button({ variant = "primary", size = "md", className = "", arrow = false, children, ...props }) {
+  // `.btn-offset` (login CTAs) already bundles its own frame; `btn-flat` opts out.
+  const usesOffset = className.includes("btn-offset");
+  const framed = FRAMED.has(variant) && !usesOffset && !className.includes("btn-flat");
+  const shape = framed || usesOffset ? "rounded-xl" : "rounded-lg";
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 border rounded-lg font-medium transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant] || variants.primary} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 border ${shape} font-medium transition duration-150 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant] || variants.primary} ${sizes[size]} ${framed ? "btn-framed" : ""} ${className}`}
       {...props}
     >
       {children}
