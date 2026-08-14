@@ -11,18 +11,15 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
 }
 
 /*
-  Signature framed control: a yellow inner ring hugging the element and a soft
-  grey outer ring that melts into the surrounding surface — the "grey outwards,
-  yellow inwards" look. Curved corners come from rounded-xl on the element, and
-  the rings inherit that radius. Prominent buttons pop slightly on hover.
+  Prominent buttons pop slightly on hover: a small lift plus a soft drop-shadow.
+  Curved corners come from rounded-xl on the element.
 */
 .btn-framed {
-  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 6px #ECEAE6;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .btn-framed:hover:not(:disabled) {
   transform: translateY(-1px) scale(1.02);
-  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 7px #E0DDD7, 0 6px 14px rgba(43, 39, 64, 0.12);
+  box-shadow: 0 6px 14px rgba(43, 39, 64, 0.12);
 }
 .btn-framed:active:not(:disabled) { transform: translateY(0) scale(0.99); }
 
@@ -30,23 +27,22 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
   Offset animation (adapted from the CodePen "offset" effect) for the login CTAs.
   Keeps the teal gradient fill: at rest a teal drop-shadow sits offset to the
   bottom-right; on hover it retracts while a translucent highlight sweeps in
-  diagonally from the top-left. Frame rings are folded into the same box-shadow
-  stack (same shadow count at rest/hover so the transition stays smooth).
+  diagonally from the top-left. Equal shadow count at rest/hover keeps it smooth.
 */
 .btn-offset {
-  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 6px #ECEAE6, 0.3em 0.3em 0 0 rgba(15, 118, 110, 0.30);
+  box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0), 0.3em 0.3em 0 0 rgba(15, 118, 110, 0.30);
   transition: box-shadow 0.3s ease, transform 0.2s ease;
 }
 .btn-offset:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 7px #E0DDD7, inset 6em 3.5em 0 0 rgba(255, 255, 255, 0.20);
+  box-shadow: inset 6em 3.5em 0 0 rgba(255, 255, 255, 0.20), 0 0 0 0 rgba(15, 118, 110, 0);
 }
 .btn-offset:active:not(:disabled) { transform: translateY(0); }
 
 /*
   Slide-reveal confirm buttons (adapted from the CodePen sliding-panel button)
   for the quiz-creation confirm modal. The base label slides out to the right
-  while the confirm label slides in from the left. Carries the framed rings too.
+  while the confirm label slides in from the left.
 */
 .btn-slide {
   position: relative;
@@ -54,7 +50,6 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
   display: block;
   width: 100%;
   border-radius: 12px;
-  box-shadow: 0 0 0 3px #FCD34D, 0 0 0 6px #ECEAE6;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 .btn-slide:hover { transform: translateY(-1px); }
