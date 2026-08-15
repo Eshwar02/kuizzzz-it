@@ -6,8 +6,10 @@ services:
     runtime: python
     rootDir: backend
     plan: free
-    # Migrations run in build (preDeployCommand is a paid-plan-only feature).
-    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    # Migrations + idempotent seed run in build (preDeployCommand is paid-only).
+    # The seed ensures the bootstrap admin (ADMIN_EMAIL/ADMIN_PASSWORD) exists,
+    # so there is always a first admin who can create other admins in-app.
+    buildCommand: pip install -r requirements.txt && alembic upgrade head && python -m app.seed
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       # Set to your managed Postgres connection string (postgresql+psycopg://...).
