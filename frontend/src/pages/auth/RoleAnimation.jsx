@@ -16,36 +16,38 @@ const loaders = {
 
 export default function RoleAnimation({ role, className = "" }) {
   const [data, setData] = useState(null);
+  const [shown, setShown] = useState(false); // drives the cross-fade
   const cache = useRef({});
 
   useEffect(() => {
     let active = true;
-    const load = loaders[role] || loaders.STUDENT;
+    setShown(false); // fade the current animation out before swapping
+
+    const apply = (anim) => {
+      if (!active) return;
+      setData(anim);
+      // Next frame: fade the new animation in.
+      requestAnimationFrame(() => active && setShown(true));
+    };
+
     if (cache.current[role]) {
-      setData(cache.current[role]);
-      return;
+      apply(cache.current[role]);
+      return () => { active = false; };
     }
-    setData(null);
-    load()
+
+    loaders[role]?.()
       .then((mod) => {
-        if (!active) return;
         cache.current[role] = mod.default;
-        setData(mod.default);
+        apply(mod.default);
       })
       .catch(() => active && setData(null)); // degrade to empty panel on failure
-    return () => {
-      active = false;
-    };
+
+    return () => { active = false; };
   }, [role]);
 
-  if (!data) return <div className={className} aria-hidden />;
   return (
-    <Lottie
-      key={role}
-      animationData={data}
-      loop
-      autoplay
-      className={className}
-    />
+    <div className={`transition-opacity duration-500 ease-in-out ${shown ? "opacity-100" : "opacity-0"} ${className}`}>
+      {data && <Lottie key={role} animationData={data} loop autoplay className="w-full h-full" />}
+    </div>
   );
 }

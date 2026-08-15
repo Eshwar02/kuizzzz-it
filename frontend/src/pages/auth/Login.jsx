@@ -51,6 +51,7 @@ export default function Login() {
 
   const welcome = WELCOME[role];
   const privilegedTab = PRIVILEGED.has(role);
+  const roleIndex = ROLES.findIndex((r) => r.key === role);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-surface via-violet/5 to-violet/20">
@@ -85,7 +86,13 @@ export default function Login() {
             <p className="text-sm text-ink/50 mt-1 mb-5">Enter your account details.</p>
 
             {/* Role selector */}
-            <div className="grid grid-cols-3 gap-1 p-1 mb-5 rounded-lg bg-surface border border-ink/10" role="tablist" aria-label="Login type">
+            <div className="relative flex p-1 mb-5 rounded-2xl bg-surface border border-ink/10" role="tablist" aria-label="Login type">
+              {/* Sliding selection pill */}
+              <span
+                aria-hidden
+                className="absolute top-1 bottom-1 left-1 rounded-xl bg-card shadow-sm border border-ink/10 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+                style={{ width: "calc((100% - 0.5rem) / 3)", transform: `translateX(${roleIndex * 100}%)` }}
+              />
               {ROLES.map((r) => (
                 <button
                   key={r.key}
@@ -93,10 +100,8 @@ export default function Login() {
                   role="tab"
                   aria-selected={role === r.key}
                   onClick={() => { setRole(r.key); setApiError(""); }}
-                  className={`py-2 text-sm font-medium rounded-md transition ${
-                    role === r.key
-                      ? "bg-card text-violet-dark shadow-sm border border-ink/10"
-                      : "text-ink/60 hover:text-ink"
+                  className={`relative z-10 flex-1 py-2 text-sm font-medium rounded-xl transition-colors duration-200 ${
+                    role === r.key ? "text-violet-dark" : "text-ink/60 hover:text-ink"
                   }`}
                 >
                   {r.label}
@@ -157,10 +162,12 @@ export default function Login() {
           {/* Right: welcome panel with role animation */}
           <div className="hidden md:flex flex-col items-center justify-center p-8 text-white bg-gradient-to-br from-emerald-400 via-teal-500 to-sky-500">
             <RoleAnimation role={role} className="w-56 h-56" />
-            <h3 className="text-2xl font-bold mt-2">
-              Welcome, <span className="font-extrabold">{welcome.title}</span>
-            </h3>
-            <p className="text-sm text-white/85 mt-1 text-center max-w-xs">{welcome.sub}</p>
+            <div key={role} className="animate-fade-rise flex flex-col items-center">
+              <h3 className="text-2xl font-bold mt-2">
+                Welcome, <span className="font-extrabold">{welcome.title}</span>
+              </h3>
+              <p className="text-sm text-white/85 mt-1 text-center max-w-xs">{welcome.sub}</p>
+            </div>
           </div>
         </div>
       )}
