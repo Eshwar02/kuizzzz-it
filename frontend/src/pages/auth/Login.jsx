@@ -106,7 +106,7 @@ export default function Login() {
           <div className="relative flex p-1 mb-5 rounded-2xl bg-surface border border-ink/10" role="tablist" aria-label="Login type">
             <span
               aria-hidden
-              className="absolute top-1 bottom-1 left-1 rounded-xl bg-card shadow-sm border border-ink/10 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              className="absolute top-1 bottom-1 left-1 rounded-xl bg-card shadow-sm border border-ink/10 transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)]"
               style={{ width: "calc((100% - 0.5rem) / 3)", transform: `translateX(${roleIndex * 100}%)` }}
             />
             {ROLES.map((r) => (
@@ -116,7 +116,7 @@ export default function Login() {
                 role="tab"
                 aria-selected={role === r.key}
                 onClick={() => { setRole(r.key); setApiError(""); }}
-                className={`relative z-10 flex-1 py-2 text-sm font-medium rounded-xl transition-colors duration-200 ${
+                className={`relative z-10 flex-1 py-2 text-sm font-medium rounded-xl transition-colors duration-700 ${
                   role === r.key ? "text-violet-dark" : "text-ink/60 hover:text-ink"
                 }`}
               >

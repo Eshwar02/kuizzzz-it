@@ -46,7 +46,7 @@ export default function RoleAnimation({ role, className = "" }) {
   }, [role]);
 
   return (
-    <div className={`transition-opacity duration-500 ease-in-out ${shown ? "opacity-100" : "opacity-0"} ${className}`}>
+    <div className={`transition-opacity duration-1000 ease-in-out ${shown ? "opacity-100" : "opacity-0"} ${className}`}>
       {data && <Lottie key={role} animationData={data} loop autoplay className="w-full h-full" />}
     </div>
   );
