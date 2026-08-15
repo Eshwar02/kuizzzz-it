@@ -1,7 +1,7 @@
 import { NavLink, Link } from "react-router-dom";
 import {
   GraduationCap, Home, Compass, Users, ClipboardList, Trophy, LayoutDashboard,
-  FileText, Sparkles, Tags, BarChart3, ChevronDown,
+  FileText, Sparkles, Tags, BarChart3,
 } from "lucide-react";
 import { useAuth } from "../../auth/AuthContext";
 import logo from "../../assets/logo.svg";
@@ -24,32 +24,11 @@ const NAV = {
   ],
 };
 
-// Role-aware targets for the logo hover menu: home + Classrooms / Quiz dashboard / Analytics.
+// Role-aware home target for the logo link.
 const BRAND = {
-  STUDENT: {
-    home: "/",
-    menu: [
-      ["/classes", "Classrooms", Users],
-      ["/dashboard", "Quiz dashboard", LayoutDashboard],
-      ["/leaderboard", "Analytics", BarChart3],
-    ],
-  },
-  FACULTY: {
-    home: "/faculty",
-    menu: [
-      ["/faculty/classes", "Classrooms", Users],
-      ["/faculty/quizzes", "Quiz dashboard", LayoutDashboard],
-      ["/faculty/dashboard", "Analytics", BarChart3],
-    ],
-  },
-  ADMIN: {
-    home: "/admin",
-    menu: [
-      ["/admin/classes", "Classrooms", Users],
-      ["/admin", "Quiz dashboard", LayoutDashboard],
-      ["/admin/analytics", "Analytics", BarChart3],
-    ],
-  },
+  STUDENT: { home: "/" },
+  FACULTY: { home: "/faculty" },
+  ADMIN: { home: "/admin" },
 };
 
 export default function Sidebar() {
@@ -57,51 +36,27 @@ export default function Sidebar() {
   const links = NAV[user?.role] || [];
   const brand = BRAND[user?.role] || BRAND.STUDENT;
   return (
-    <aside className="w-56 shrink-0 bg-card border-r border-ink/15 h-screen overflow-y-auto p-3">
-      {/* Brand: click logo → home; hover → quick-nav dropdown. */}
-      <div className="relative group mb-1">
-        <Link
-          to={brand.home}
-          title="Go to home"
-          className="flex items-center gap-2 px-2 py-3 rounded-md hover:bg-violet/5 transition"
-        >
-          <img src={logo} alt="Kuizzz" className="h-9 w-9 rounded-md shrink-0" />
-          <span className="text-xl font-semibold text-violet-dark truncate">Kuizzz</span>
-          <ChevronDown size={16} className="ml-auto text-ink/40 group-hover:text-violet transition" />
-        </Link>
-        {/* pt-1 keeps the hover bridge alive between the logo and the menu */}
-        <div className="absolute left-0 right-0 top-full z-40 pt-1 hidden group-hover:block">
-          <div className="rounded-md border border-ink/15 bg-card shadow-lg overflow-hidden">
-            {brand.menu.map(([to, label, Icon]) => (
-              <NavLink
-                key={label}
-                to={to}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2.5 text-sm ${
-                    isActive
-                      ? "bg-violet/10 text-violet-dark"
-                      : "text-ink/80 hover:bg-violet/10 hover:text-violet-dark"
-                  }`
-                }
-              >
-                <Icon size={16} />
-                {label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      </div>
-      <nav className="space-y-1">
+    <aside className="w-60 shrink-0 bg-card border-r border-ink/15 h-screen overflow-y-auto p-3.5">
+      {/* Brand: click logo → home. */}
+      <Link
+        to={brand.home}
+        title="Go to home"
+        className="flex items-center gap-2 px-2 py-3 mb-1"
+      >
+        <img src={logo} alt="Kuizzz" className="h-9 w-9 rounded-md shrink-0" />
+        <span className="text-xl font-semibold text-violet-dark truncate">Kuizzz</span>
+      </Link>
+      <nav className="space-y-2">
         {links.map(([to, label, Icon]) => (
           <NavLink
             key={to}
             to={to}
             end={to === "/" || to === "/faculty" || to === "/admin"}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-md text-sm border-l-2 ${
+              `flex items-center gap-3 px-3.5 py-2.5 rounded-md text-sm border-l-2 transition ${
                 isActive
                   ? "bg-violet text-white border-violet"
-                  : "text-ink/80 border-transparent hover:bg-violet/5 hover:text-violet-dark"
+                  : "text-ink/80 border-transparent hover:bg-violet/5 hover:text-violet-dark hover:shadow-[0_2px_8px_rgba(43,39,64,0.10)]"
               }`
             }
           >
