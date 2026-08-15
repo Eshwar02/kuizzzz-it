@@ -1,0 +1,22 @@
+# Render blueprint for the FastAPI backend.
+# Frontend is deployed separately on Vercel (see frontend/vercel.json).
+services:
+  - type: web
+    name: quizzz-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    preDeployCommand: alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # Set to your managed Postgres connection string (postgresql+psycopg://...).
+      - key: DATABASE_URL
+        sync: false
+      # Your Vercel frontend URL, e.g. https://quizzz.vercel.app (for CORS).
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MISTRAL_API_KEY
+        sync: false
