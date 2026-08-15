@@ -14,10 +14,15 @@ const loaders = {
   STUDENT: () => import("../../assets/lottie/student.json"),
 };
 
+// Playback speed for the character animations (0.5 = half speed) so the motion
+// feels calm and smooth, matching the ~1s UI transitions.
+const PLAYBACK_SPEED = 0.5;
+
 export default function RoleAnimation({ role, className = "" }) {
   const [data, setData] = useState(null);
   const [shown, setShown] = useState(false); // drives the cross-fade
   const cache = useRef({});
+  const lottieRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -47,7 +52,17 @@ export default function RoleAnimation({ role, className = "" }) {
 
   return (
     <div className={`transition-opacity duration-1000 ease-in-out ${shown ? "opacity-100" : "opacity-0"} ${className}`}>
-      {data && <Lottie key={role} animationData={data} loop autoplay className="w-full h-full" />}
+      {data && (
+        <Lottie
+          key={role}
+          lottieRef={lottieRef}
+          animationData={data}
+          loop
+          autoplay
+          onDOMLoaded={() => lottieRef.current?.setSpeed(PLAYBACK_SPEED)}
+          className="w-full h-full"
+        />
+      )}
     </div>
   );
 }
