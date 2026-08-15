@@ -53,16 +53,10 @@ export default function Login() {
   const privilegedTab = PRIVILEGED.has(role);
   const roleIndex = ROLES.findIndex((r) => r.key === role);
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-surface via-violet/5 to-violet/20">
-      {/* Logo on top */}
-      <div className="flex flex-col items-center gap-2 mb-6">
-        <img src={logo} alt="Kuizzz logo" className="h-12 w-12 rounded-xl shadow-[0_6px_18px_rgba(13,148,136,0.33)]" />
-        <h1 className="text-3xl font-semibold text-violet-dark">Kuizzz</h1>
-        <p className="text-sm text-ink/50">Create, assign, and take assessments.</p>
-      </div>
-
-      {postLogin ? (
+  // Post-login IP notice (privileged only) — centered on the page.
+  if (postLogin) {
+    return (
+      <div className="min-h-screen grid place-items-center p-4 bg-gradient-to-br from-surface via-violet/5 to-violet/20">
         <div className="w-full max-w-md">
           <Card title="Signed in">
             <p className="text-sm text-ink/80">You're signed in. Continue to your dashboard.</p>
@@ -78,99 +72,112 @@ export default function Login() {
             <Button variant="gradient" arrow size="lg" className="w-full mt-4 btn-offset" onClick={() => navigate(postLogin.to, { replace: true })}>Continue</Button>
           </Card>
         </div>
-      ) : (
-        <div className="w-full max-w-4xl grid md:grid-cols-2 rounded-2xl overflow-hidden shadow-[0_16px_50px_rgba(13,148,136,0.15)] bg-card border border-ink/10">
-          {/* Left: form */}
-          <div className="p-8">
-            <h2 className="text-2xl font-semibold text-ink">Login</h2>
-            <p className="text-sm text-ink/50 mt-1 mb-5">Enter your account details.</p>
+      </div>
+    );
+  }
 
-            {/* Role selector */}
-            <div className="relative flex p-1 mb-5 rounded-2xl bg-surface border border-ink/10" role="tablist" aria-label="Login type">
-              {/* Sliding selection pill */}
-              <span
-                aria-hidden
-                className="absolute top-1 bottom-1 left-1 rounded-xl bg-card shadow-sm border border-ink/10 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-                style={{ width: "calc((100% - 0.5rem) / 3)", transform: `translateX(${roleIndex * 100}%)` }}
-              />
-              {ROLES.map((r) => (
-                <button
-                  key={r.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={role === r.key}
-                  onClick={() => { setRole(r.key); setApiError(""); }}
-                  className={`relative z-10 flex-1 py-2 text-sm font-medium rounded-xl transition-colors duration-200 ${
-                    role === r.key ? "text-violet-dark" : "text-ink/60 hover:text-ink"
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <label className="block">
-                <span className="block text-sm font-medium text-ink/80 mb-1">Email</span>
-                <input
-                  type="email"
-                  className={`w-full border rounded-sm px-3 py-2 bg-card text-ink focus:outline-none focus:border-violet ${errors.email ? "border-red-500" : "border-ink/20"}`}
-                  {...register("email", { required: "Email is required" })}
-                />
-                {errors.email && <span className="block text-xs text-red-600 mt-1">{errors.email.message}</span>}
-              </label>
-
-              <label className="block">
-                <span className="block text-sm font-medium text-ink/80 mb-1">Password</span>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    className={`w-full border rounded-sm px-3 py-2 pr-10 bg-card text-ink focus:outline-none focus:border-violet ${errors.password ? "border-red-500" : "border-ink/20"}`}
-                    {...register("password", { required: "Password is required" })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((s) => !s)}
-                    className="absolute inset-y-0 right-0 px-3 flex items-center text-ink/40 hover:text-ink/70"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {errors.password && <span className="block text-xs text-red-600 mt-1">{errors.password.message}</span>}
-              </label>
-
-              {apiError && <p className="text-sm text-red-600">{apiError}</p>}
-              <Button type="submit" variant="gradient" arrow size="lg" disabled={isSubmitting} className="w-full btn-offset">
-                {isSubmitting ? "Signing in…" : "Login"}
-              </Button>
-            </form>
-
-            <p className="text-sm text-right mt-3">
-              <Link to="/forgot-password" className="text-violet-dark font-medium">Forgot password?</Link>
-            </p>
-            {privilegedTab && (
-              <p className="text-xs text-ink/50 mt-4 border-t border-ink/10 pt-3">
-                Your IP address is collected for security purposes and to prevent account misuse.
-              </p>
-            )}
-            <p className="text-sm text-center mt-4">
-              No account? <Link to="/register" className="text-violet-dark font-medium">Register</Link>
-            </p>
-          </div>
-
-          {/* Right: welcome panel with role animation */}
-          <div className="hidden md:flex flex-col items-center justify-center p-8 text-white bg-gradient-to-br from-emerald-400 via-teal-500 to-sky-500">
-            <RoleAnimation role={role} className="w-56 h-56" />
-            <div key={role} className="animate-fade-rise flex flex-col items-center">
-              <h3 className="text-2xl font-bold mt-2">
-                Welcome, <span className="font-extrabold">{welcome.title}</span>
-              </h3>
-              <p className="text-sm text-white/85 mt-1 text-center max-w-xs">{welcome.sub}</p>
-            </div>
-          </div>
+  return (
+    <div className="min-h-screen flex flex-col md:flex-row bg-card">
+      {/* Left half: full-height welcome panel with role animation + curved edge */}
+      <div className="relative hidden md:flex md:w-1/2 flex-col items-center justify-center p-10 text-white bg-gradient-to-br from-emerald-400 via-teal-500 to-sky-500 md:rounded-r-[38%]">
+        <RoleAnimation role={role} className="w-72 h-72" />
+        <div key={role} className="animate-fade-rise flex flex-col items-center">
+          <h3 className="text-3xl font-bold mt-2">
+            Welcome, <span className="font-extrabold">{welcome.title}</span>
+          </h3>
+          <p className="text-base text-white/85 mt-2 text-center max-w-sm">{welcome.sub}</p>
         </div>
-      )}
+      </div>
+
+      {/* Right half: logo on top + centered login form */}
+      <div className="w-full md:w-1/2 flex flex-col items-center justify-center p-6 md:p-10 bg-card">
+        <div className="w-full max-w-md">
+          {/* Logo on top */}
+          <div className="flex flex-col items-center gap-2 mb-8">
+            <img src={logo} alt="Kuizzz logo" className="h-12 w-12 rounded-xl shadow-[0_6px_18px_rgba(13,148,136,0.33)]" />
+            <h1 className="text-3xl font-semibold text-violet-dark">Kuizzz</h1>
+            <p className="text-sm text-ink/50">Create, assign, and take assessments.</p>
+          </div>
+
+          <h2 className="text-2xl font-semibold text-ink">Login</h2>
+          <p className="text-sm text-ink/50 mt-1 mb-5">Enter your account details.</p>
+
+          {/* Role selector with sliding selection pill */}
+          <div className="relative flex p-1 mb-5 rounded-2xl bg-surface border border-ink/10" role="tablist" aria-label="Login type">
+            <span
+              aria-hidden
+              className="absolute top-1 bottom-1 left-1 rounded-xl bg-card shadow-sm border border-ink/10 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+              style={{ width: "calc((100% - 0.5rem) / 3)", transform: `translateX(${roleIndex * 100}%)` }}
+            />
+            {ROLES.map((r) => (
+              <button
+                key={r.key}
+                type="button"
+                role="tab"
+                aria-selected={role === r.key}
+                onClick={() => { setRole(r.key); setApiError(""); }}
+                className={`relative z-10 flex-1 py-2 text-sm font-medium rounded-xl transition-colors duration-200 ${
+                  role === r.key ? "text-violet-dark" : "text-ink/60 hover:text-ink"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <label className="block">
+              <span className="block text-sm font-medium text-ink/80 mb-1">Email</span>
+              <input
+                type="email"
+                className={`w-full border rounded-sm px-3 py-2 bg-card text-ink focus:outline-none focus:border-violet ${errors.email ? "border-red-500" : "border-ink/20"}`}
+                {...register("email", { required: "Email is required" })}
+              />
+              {errors.email && <span className="block text-xs text-red-600 mt-1">{errors.email.message}</span>}
+            </label>
+
+            <label className="block">
+              <span className="block text-sm font-medium text-ink/80 mb-1">Password</span>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className={`w-full border rounded-sm px-3 py-2 pr-10 bg-card text-ink focus:outline-none focus:border-violet ${errors.password ? "border-red-500" : "border-ink/20"}`}
+                  {...register("password", { required: "Password is required" })}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute inset-y-0 right-0 px-3 flex items-center text-ink/40 hover:text-ink/70"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && <span className="block text-xs text-red-600 mt-1">{errors.password.message}</span>}
+            </label>
+
+            {apiError && <p className="text-sm text-red-600">{apiError}</p>}
+            <Button type="submit" variant="gradient" arrow size="lg" disabled={isSubmitting} className="w-full btn-offset">
+              {isSubmitting ? "Signing in…" : "Login"}
+            </Button>
+          </form>
+
+          <p className="text-sm text-right mt-3">
+            <Link to="/forgot-password" className="text-violet-dark font-medium">Forgot password?</Link>
+          </p>
+          {/* Always occupies space so the form box height stays fixed across
+              tabs; only the visibility changes (shown for privileged roles). */}
+          <p
+            aria-hidden={!privilegedTab}
+            className={`text-xs text-ink/50 mt-4 border-t border-ink/10 pt-3 transition-opacity duration-200 ${privilegedTab ? "opacity-100" : "opacity-0"}`}
+          >
+            Your IP address is collected for security purposes and to prevent account misuse.
+          </p>
+          <p className="text-sm text-center mt-4">
+            No account? <Link to="/register" className="text-violet-dark font-medium">Register</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
