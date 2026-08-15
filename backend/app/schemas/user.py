@@ -44,6 +44,9 @@ class UserOut(UserBase):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    # Optional login "type" chosen on the login page. When set, the account's
+    # real role must match, otherwise the login is rejected.
+    role: UserRole | None = None
 
 
 class Token(BaseModel):

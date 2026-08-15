@@ -71,6 +71,10 @@ def register(payload: UserRegister, db: Session = Depends(get_db)) -> User:
     return user
 
 
+# Roles for which we detect and surface the sign-in IP address.
+PRIVILEGED_ROLES = (UserRole.ADMIN, UserRole.FACULTY)
+
+
 @router.post("/login", response_model=Token)
 def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)) -> Token:
     user = _get_user_by_email(db, payload.email)
@@ -78,12 +82,20 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
         )
+    # Enforce the login "type" chosen on the login page, if one was sent.
+    if payload.role is not None and user.role != payload.role:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"This login is for {payload.role.value.lower()}s only.",
+        )
     if user.status != UserStatus.ACTIVE:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account is not active. Contact an administrator.",
         )
-    return _issue_token(user, _client_ip(request))
+    # IP address is collected/surfaced only for privileged accounts.
+    client_ip = _client_ip(request) if user.role in PRIVILEGED_ROLES else None
+    return _issue_token(user, client_ip)
 
 
 @router.post("/login/token", response_model=Token, include_in_schema=False)

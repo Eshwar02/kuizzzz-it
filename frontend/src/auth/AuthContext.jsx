@@ -17,8 +17,8 @@ export function AuthProvider({ children }) {
     authApi.me().then(setUser).catch(() => localStorage.removeItem(TOKEN_KEY)).finally(() => setLoading(false));
   }, []);
 
-  const login = async (email, password) => {
-    const data = await authApi.login(email, password); // {access_token, user, client_ip}
+  const login = async (email, password, role) => {
+    const data = await authApi.login(email, password, role); // {access_token, user, client_ip}
     localStorage.setItem(TOKEN_KEY, data.access_token);
     setUser(data.user);
     return data;
