@@ -7,7 +7,27 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
 
 @layer components {
   .card-soft { @apply bg-card border border-ink/10 rounded-sm shadow-[0_1px_2px_rgba(43,39,64,0.06),0_4px_12px_rgba(43,39,64,0.05)]; }
-  .hover-lift { @apply transition duration-150 hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(43,39,64,0.10)]; }
+  .hover-lift {
+    @apply hover:shadow-[0_6px_20px_rgba(43,39,64,0.10)];
+    transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+  .hover-lift:hover { transform: translate3d(0, -2px, 0); }
+}
+
+/*
+  Interactive elements that transform on hover run on their own GPU layer so the
+  motion stays smooth and text stays crisp (no per-frame re-rasterisation).
+*/
+.btn-framed,
+.btn-offset,
+.btn-slide {
+  transform: translateZ(0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
 /*
@@ -15,13 +35,13 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
   Curved corners come from rounded-xl on the element.
 */
 .btn-framed {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.25s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .btn-framed:hover:not(:disabled) {
-  transform: translateY(-1px) scale(1.02);
+  transform: translate3d(0, -2px, 0) scale(1.02);
   box-shadow: 0 6px 14px rgba(43, 39, 64, 0.12);
 }
-.btn-framed:active:not(:disabled) { transform: translateY(0) scale(0.99); }
+.btn-framed:active:not(:disabled) { transform: translate3d(0, 0, 0) scale(0.99); }
 
 /*
   Offset animation (adapted from the CodePen "offset" effect) for the login CTAs.
@@ -31,13 +51,13 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
 */
 .btn-offset {
   box-shadow: inset 0 0 0 0 rgba(255, 255, 255, 0), 0.3em 0.3em 0 0 rgba(15, 118, 110, 0.30);
-  transition: box-shadow 0.3s ease, transform 0.2s ease;
+  transition: box-shadow 0.3s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .btn-offset:hover:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translate3d(0, -2px, 0);
   box-shadow: inset 6em 3.5em 0 0 rgba(255, 255, 255, 0.20), 0 0 0 0 rgba(15, 118, 110, 0);
 }
-.btn-offset:active:not(:disabled) { transform: translateY(0); }
+.btn-offset:active:not(:disabled) { transform: translate3d(0, 0, 0); }
 
 /*
   Slide-reveal confirm buttons (adapted from the CodePen sliding-panel button)
@@ -50,10 +70,10 @@ body { @apply bg-surface text-ink antialiased; font-family: system-ui, -apple-sy
   display: block;
   width: 100%;
   border-radius: 12px;
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: box-shadow 0.2s ease, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.btn-slide:hover { transform: translateY(-1px); }
-.btn-slide:active { transform: translateY(0) scale(0.99); }
+.btn-slide:hover { transform: translate3d(0, -2px, 0); }
+.btn-slide:active { transform: translate3d(0, 0, 0) scale(0.99); }
 .btn-slide__base,
 .btn-slide__reveal {
   display: flex;
