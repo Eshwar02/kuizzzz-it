@@ -48,7 +48,23 @@ def list_users(
     status_filter: UserStatus | None = Query(default=None, alias="status"),
     search: str | None = Query(default=None),
 ) -> list[UserWithStats]:
-    stmt = select(User)
+    # Per-user attempt stats aggregated in one grouped subquery, then LEFT
+    # JOINed to users — a single round trip instead of one query per user.
+    stats = (
+        select(
+            Attempt.user_id.label("uid"),
+            func.count(Attempt.id).label("attempted"),
+            func.coalesce(func.avg(Attempt.percentage), 0.0).label("avg_score"),
+            func.coalesce(func.max(Attempt.percentage), 0.0).label("high_score"),
+        )
+        .where(Attempt.status != AttemptStatus.IN_PROGRESS)
+        .group_by(Attempt.user_id)
+        .subquery()
+    )
+
+    stmt = select(
+        User, stats.c.attempted, stats.c.avg_score, stats.c.high_score
+    ).outerjoin(stats, User.id == stats.c.uid)
     if role is not None:
         stmt = stmt.where(User.role == role)
     if status_filter is not None:
@@ -57,7 +73,15 @@ def list_users(
         like = f"%{search}%"
         stmt = stmt.where((User.name.ilike(like)) | (User.email.ilike(like)))
     stmt = stmt.order_by(User.created_at.desc())
-    return [_with_stats(db, u) for u in db.scalars(stmt).all()]
+
+    result = []
+    for user, attempted, avg_score, high_score in db.execute(stmt).all():
+        out = UserWithStats.model_validate(user)
+        out.quizzes_attempted = int(attempted or 0)
+        out.average_score = round(float(avg_score or 0.0), 2)
+        out.highest_score = round(float(high_score or 0.0), 2)
+        result.append(out)
+    return result
 
 
 @router.get("/{user_id}", response_model=UserWithStats)
